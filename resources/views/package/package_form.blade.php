@@ -43,11 +43,26 @@
                     rows="5"
                 >{{ old('features', isset($package) && is_array($package->features) ? implode("\n", $package->features) : (isset($package) && is_string($package->features) ? $package->features : '')) }}</flux:textarea>
 
+                <flux:input 
+                    name="max_photos" 
+                    type="number" 
+                    label="Maksimal Foto Galeri" 
+                    value="{{ old('max_photos', $package->max_photos ?? 0) }}" 
+                    required 
+                />
+
                 <flux:checkbox 
                     name="is_active" 
                     label="Aktifkan paket ini?" 
                     value="1" 
                     :checked="old('is_active', $package->is_active ?? true)"
+                />
+
+                <flux:checkbox 
+                    name="enable_bgm" 
+                    label="Izinkan BGM (Background Music)?" 
+                    value="1" 
+                    :checked="old('enable_bgm', $package->enable_bgm ?? false)"
                 />
             </div>
 

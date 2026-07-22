@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
 use App\Services\DigitalEnvelopeService;
@@ -25,8 +26,17 @@ class InvitationController extends Controller
         private readonly DigitalEnvelopeService $digitalEnvelopeService
     ) {}
 
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
+        if ($request->user()->invitations()->exists()) {
+            return NotificationHelper::redirectWithError('dashboard', 'Anda hanya dapat membuat maksimal 1 undangan per akun.');
+        }
+
+        $latestOrder = \App\Models\Order::where('user_id', $request->user()->id)->latest()->first();
+        if ($latestOrder && $latestOrder->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mulai membuat undangan.');
+        }
+
         $packages = $this->packageService->getAllPackages();
         $templates = $this->templateService->getAllTemplates();
 
@@ -35,6 +45,10 @@ class InvitationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user()->invitations()->exists()) {
+            return NotificationHelper::redirectWithError('dashboard', 'Anda hanya dapat membuat maksimal 1 undangan per akun.');
+        }
+
         $validated = $request->validate([
             'package_id' => 'required|exists:packages,id',
             'template_id' => 'required|exists:templates,id',
@@ -45,15 +59,19 @@ class InvitationController extends Controller
 
         $this->invitationService->createInvitationAndOrder($request->user(), $validated);
 
-        return redirect()->route('dashboard')->with('toast', 'Pesanan dan draft undangan berhasil dibuat!');
+        return NotificationHelper::redirectSuccess('dashboard', 'Pesanan dan draft undangan berhasil dibuat!');
     }
 
-    public function edit(Request $request, int $id): View
+    public function edit(Request $request, int $id): View|RedirectResponse
     {
         $invitation = Invitation::with(['events', 'galleries', 'digitalEnvelopes'])->findOrFail($id);
 
         if ($invitation->user_id !== $request->user()->id) {
             abort(403, 'Anda tidak diizinkan mengubah undangan ini.');
+        }
+
+        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mulai mengedit undangan.');
         }
 
         return view('customer.invitation.invitation_edit', compact('invitation'));
@@ -66,6 +84,18 @@ class InvitationController extends Controller
         if ($invitation->user_id !== $request->user()->id) {
             abort(403, 'Anda tidak diizinkan mengubah undangan ini.');
         }
+
+        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk melakukan tindakan ini.');
+        }
+
+        $events = collect($request->input('events', []))->filter(fn ($e) => ! empty($e['name']))->values()->toArray();
+        $envelopes = collect($request->input('envelopes', []))->filter(fn ($e) => ! empty($e['bank_name']))->values()->toArray();
+
+        $request->merge([
+            'events' => $events,
+            'envelopes' => $envelopes,
+        ]);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -84,31 +114,49 @@ class InvitationController extends Controller
             'events.*.google_maps_link' => 'nullable|url',
 
             'galleries' => 'nullable|array',
-            'galleries.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'galleries.*' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:2048',
 
             'envelopes' => 'nullable|array',
             'envelopes.*.id' => 'nullable|integer',
             'envelopes.*.bank_name' => 'required|string|max:255',
             'envelopes.*.account_name' => 'required|string|max:255',
             'envelopes.*.account_number' => 'nullable|string|max:255',
-            'envelopes.*.qr_code_file' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'envelopes.*.qr_code_file' => 'nullable|file|image|mimes:jpeg,png,jpg|max:2048',
+
+            'music_path' => 'nullable|string',
+        ], [
+            'events.*.name.required' => 'Terdapat acara yang belum memiliki Nama Acara.',
+            'events.*.start_time.required' => 'Terdapat acara yang belum memiliki Waktu Mulai.',
+            'events.*.location_name.required' => 'Terdapat acara yang belum memiliki Nama Lokasi.',
+            'events.*.location_address.required' => 'Terdapat acara yang belum memiliki Alamat.',
+            'galleries.*.max' => 'Ukuran salah satu foto galeri melebihi batas 2MB.',
+            'galleries.*.uploaded' => 'Gagal mengunggah foto. Pastikan ukuran file kurang dari 2MB (batas server).',
+            'galleries.*.image' => 'File galeri harus berupa gambar.',
+            'envelopes.*.bank_name.required' => 'Terdapat amplop digital yang belum memiliki Nama Bank.',
+            'envelopes.*.account_name.required' => 'Terdapat amplop digital yang belum memiliki Atas Nama.',
+            'envelopes.*.qr_code_file.max' => 'Ukuran file QRIS melebihi batas 2MB.',
+            'envelopes.*.qr_code_file.uploaded' => 'Gagal mengunggah QRIS. Pastikan file kurang dari 2MB (batas server).',
         ]);
 
-        $this->invitationService->updateInvitation($invitation, $validated);
+        try {
+            $this->invitationService->updateInvitation($invitation, $validated);
 
-        if (isset($validated['events'])) {
-            $this->eventService->syncEvents($invitation, $validated['events']);
+            if (isset($validated['events'])) {
+                $this->eventService->syncEvents($invitation, $validated['events']);
+            }
+
+            if (isset($validated['envelopes'])) {
+                $this->digitalEnvelopeService->syncEnvelopes($invitation, $validated['envelopes']);
+            }
+
+            if ($request->hasFile('galleries')) {
+                $this->galleryService->uploadGalleries($invitation, $request->file('galleries'));
+            }
+
+            return NotificationHelper::backWithSuccess('Detail undangan berhasil disimpan!');
+        } catch (\Exception $e) {
+            return NotificationHelper::backWithError('Gagal menyimpan data: '.$e->getMessage());
         }
-
-        if (isset($validated['envelopes'])) {
-            $this->digitalEnvelopeService->syncEnvelopes($invitation, $validated['envelopes']);
-        }
-
-        if ($request->hasFile('galleries')) {
-            $this->galleryService->uploadGalleries($invitation, $request->file('galleries'));
-        }
-
-        return redirect()->back()->with('toast', 'Detail undangan berhasil disimpan!');
     }
 
     public function toggleStatus(Request $request, int $id): RedirectResponse
@@ -119,8 +167,29 @@ class InvitationController extends Controller
             abort(403, 'Anda tidak diizinkan mengubah status undangan ini.');
         }
 
+        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mempublikasikan undangan.');
+        }
+
         $this->invitationService->toggleStatus($invitation);
 
-        return redirect()->back()->with('toast', 'Status undangan berhasil diubah!');
+        return NotificationHelper::backWithSuccess('Status undangan berhasil diubah!');
+    }
+
+    public function destroy(Request $request, int $id): RedirectResponse
+    {
+        $invitation = Invitation::with(['galleries', 'digitalEnvelopes'])->findOrFail($id);
+
+        if ($invitation->user_id !== $request->user()->id) {
+            abort(403, 'Anda tidak diizinkan menghapus undangan ini.');
+        }
+
+        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu sebelum menghapus undangan.');
+        }
+
+        $this->invitationService->deleteInvitation($invitation);
+
+        return NotificationHelper::redirectSuccess('dashboard', 'Undangan berhasil dihapus beserta seluruh file pendukungnya!');
     }
 }

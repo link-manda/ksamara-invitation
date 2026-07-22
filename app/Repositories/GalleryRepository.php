@@ -10,4 +10,14 @@ class GalleryRepository
     {
         return Gallery::create($data);
     }
+
+    public function getByInvitationId(int $invitationId)
+    {
+        return Gallery::where('invitation_id', $invitationId)->get();
+    }
+
+    public function countByInvitationId(int $invitationId): int
+    {
+        return Gallery::where('invitation_id', $invitationId)->count();
+    }
 }

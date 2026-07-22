@@ -6,6 +6,8 @@ use App\Enums\RsvpStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
 use App\Repositories\RsvpRepository;
+use App\Helpers\NotificationHelper;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -13,12 +15,16 @@ class RsvpController extends Controller
 {
     public function __construct(private readonly RsvpRepository $rsvpRepository) {}
 
-    public function index(Request $request, int $invitationId): View
+    public function index(Request $request, int $invitationId): View|RedirectResponse
     {
         $invitation = Invitation::findOrFail($invitationId);
 
         if ($invitation->user_id !== $request->user()->id) {
             abort(403, 'Anda tidak diizinkan mengakses data ini.');
+        }
+
+        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk melihat daftar RSVP.');
         }
 
         $rsvps = $this->rsvpRepository->getByInvitationId($invitationId);

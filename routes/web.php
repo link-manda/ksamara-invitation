@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Route::get('invitations/{id}/edit', [InvitationController::class, 'edit'])->name('customer.invitations.edit');
     Route::put('invitations/{id}', [InvitationController::class, 'update'])->name('customer.invitations.update');
     Route::patch('invitations/{id}/toggle-status', [InvitationController::class, 'toggleStatus'])->name('customer.invitations.toggle-status');
+    Route::delete('invitations/{id}', [InvitationController::class, 'destroy'])->name('customer.invitations.destroy');
     Route::get('invitations/{id}/rsvps', [RsvpController::class, 'index'])->name('customer.invitations.rsvps.index');
 
     Route::get('orders', [OrderController::class, 'index'])->name('customer.orders.index');

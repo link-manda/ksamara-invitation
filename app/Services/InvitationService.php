@@ -10,6 +10,7 @@ use App\Repositories\InvitationRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PackageRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class InvitationService
 {
@@ -64,5 +65,26 @@ class InvitationService
         };
 
         return $this->invitationRepository->update($invitation, ['status' => $newStatus]);
+    }
+
+    public function deleteInvitation(Invitation $invitation): bool
+    {
+        return DB::transaction(function () use ($invitation) {
+            foreach ($invitation->galleries as $gallery) {
+                if (Storage::disk('public')->exists($gallery->file_path)) {
+                    Storage::disk('public')->delete($gallery->file_path);
+                }
+            }
+
+            foreach ($invitation->digitalEnvelopes as $envelope) {
+                if ($envelope->qr_code_path && Storage::disk('public')->exists($envelope->qr_code_path)) {
+                    Storage::disk('public')->delete($envelope->qr_code_path);
+                }
+            }
+
+            Storage::disk('public')->deleteDirectory('galleries/invitation_'.$invitation->id);
+
+            return $this->invitationRepository->delete($invitation);
+        });
     }
 }

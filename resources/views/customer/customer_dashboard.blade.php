@@ -6,7 +6,9 @@
             <flux:heading size="xl" level="1">{{ __('Dashboard') }}</flux:heading>
             <flux:subheading>Selamat datang di area customer Samara Invitation.</flux:subheading>
         </div>
-        <flux:button href="{{ route('customer.invitations.create') }}" variant="primary" icon="plus">Buat Undangan Baru</flux:button>
+        @if(!$has_invitation)
+            <flux:button href="{{ route('customer.invitations.create') }}" variant="primary" icon="plus">Buat Undangan Baru</flux:button>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -54,10 +56,16 @@
                         @endif
                     </div>
 
-                    <div class="flex flex-wrap gap-2 mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                        <flux:button href="{{ route('customer.invitations.edit', $invitation->id) }}" size="sm" variant="outline" icon="pencil-square">Edit</flux:button>
+                    <div class="flex flex-wrap items-center gap-2 mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                        <flux:button href="{{ route('customer.invitations.edit', $invitation->id) }}" size="sm" variant="outline" icon="pencil-square">Edit Undangan</flux:button>
                         <flux:button href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}" size="sm" variant="outline" icon="users">RSVP</flux:button>
                         
+                        <form action="{{ route('customer.invitations.destroy', $invitation->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus permanen? Biaya tidak bisa di-refund!')">
+                            @csrf
+                            @method('DELETE')
+                            <flux:button type="submit" size="sm" variant="danger" icon="trash">Hapus Undangan</flux:button>
+                        </form>
+
                         <form action="{{ route('customer.invitations.toggle-status', $invitation->id) }}" method="POST" class="inline-block ml-auto">
                             @csrf
                             @method('PATCH')

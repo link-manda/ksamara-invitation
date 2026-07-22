@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Repositories\OrderRepository;
@@ -29,6 +30,6 @@ class OrderController extends Controller
 
         $this->orderService->markAsPaid($order);
 
-        return redirect()->back()->with('toast', 'Status pesanan berhasil diubah menjadi Lunas!');
+        return NotificationHelper::backWithSuccess('Status pesanan berhasil diubah menjadi Lunas!');
     }
 }

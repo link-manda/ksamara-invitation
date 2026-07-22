@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Services\PackageService;
 use Illuminate\Http\RedirectResponse;
@@ -33,11 +34,13 @@ class PackageController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'features' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'max_photos' => ['required', 'integer', 'min:0'],
+            'enable_bgm' => ['nullable', 'boolean'],
         ]);
 
         $this->packageService->createPackage($validated);
 
-        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil ditambahkan.');
+        return NotificationHelper::redirectSuccess('admin.packages.index', 'Paket berhasil ditambahkan.');
     }
 
     public function edit(int $id): View
@@ -54,17 +57,19 @@ class PackageController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'features' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'max_photos' => ['required', 'integer', 'min:0'],
+            'enable_bgm' => ['nullable', 'boolean'],
         ]);
 
         $this->packageService->updatePackage($id, $validated);
 
-        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil diperbarui.');
+        return NotificationHelper::redirectSuccess('admin.packages.index', 'Paket berhasil diperbarui.');
     }
 
     public function destroy(int $id): RedirectResponse
     {
         $this->packageService->deletePackage($id);
 
-        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil dihapus.');
+        return NotificationHelper::redirectSuccess('admin.packages.index', 'Paket berhasil dihapus.');
     }
 }

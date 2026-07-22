@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Services\SettingService;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,6 @@ class SettingController extends Controller
 
         $this->settingService->updateSettings($data);
 
-        return redirect()->back()->with('toast', 'Pengaturan berhasil diperbarui.');
+        return NotificationHelper::backWithSuccess('Pengaturan berhasil diperbarui.');
     }
 }

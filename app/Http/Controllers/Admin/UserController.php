@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -35,8 +35,7 @@ class UserController extends Controller
 
         $this->userService->createCustomer($validated);
 
-        return redirect()->route('admin.users.index')
-            ->with('toast', 'Pelanggan berhasil ditambahkan!');
+        return NotificationHelper::redirectSuccess('admin.users.index', 'Pelanggan berhasil ditambahkan!');
     }
 
     public function edit(int $id): View
@@ -59,8 +58,7 @@ class UserController extends Controller
 
         $this->userService->updateCustomer($user, $validated);
 
-        return redirect()->route('admin.users.index')
-            ->with('toast', 'Data pelanggan berhasil diperbarui!');
+        return NotificationHelper::redirectSuccess('admin.users.index', 'Data pelanggan berhasil diperbarui!');
     }
 
     public function destroy(int $id): RedirectResponse
@@ -68,7 +66,6 @@ class UserController extends Controller
         $user = $this->userService->getCustomerById($id);
         $this->userService->deleteCustomer($user);
 
-        return redirect()->route('admin.users.index')
-            ->with('toast', 'Pelanggan berhasil dihapus!');
+        return NotificationHelper::redirectSuccess('admin.users.index', 'Pelanggan berhasil dihapus!');
     }
 }

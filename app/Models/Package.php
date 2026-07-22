@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'price', 'features', 'is_active'])]
+#[Fillable(['name', 'price', 'features', 'is_active', 'max_photos', 'enable_bgm'])]
 class Package extends Model
 {
     /** @use HasFactory<PackageFactory> */

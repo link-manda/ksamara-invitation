@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Services\TemplateService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -34,8 +34,7 @@ class TemplateController extends Controller
 
         $this->templateService->createTemplate($validated);
 
-        return redirect()->route('admin.templates.index')
-            ->with('toast', 'Template berhasil ditambahkan!');
+        return NotificationHelper::redirectSuccess('admin.templates.index', 'Template berhasil ditambahkan!');
     }
 
     public function edit(int $id): View
@@ -57,8 +56,7 @@ class TemplateController extends Controller
 
         $this->templateService->updateTemplate($template, $validated);
 
-        return redirect()->route('admin.templates.index')
-            ->with('toast', 'Template berhasil diperbarui!');
+        return NotificationHelper::redirectSuccess('admin.templates.index', 'Template berhasil diperbarui!');
     }
 
     public function destroy(int $id): RedirectResponse
@@ -66,7 +64,6 @@ class TemplateController extends Controller
         $template = $this->templateService->getTemplateById($id);
         $this->templateService->deleteTemplate($template);
 
-        return redirect()->route('admin.templates.index')
-            ->with('toast', 'Template berhasil dihapus!');
+        return NotificationHelper::redirectSuccess('admin.templates.index', 'Template berhasil dihapus!');
     }
 }

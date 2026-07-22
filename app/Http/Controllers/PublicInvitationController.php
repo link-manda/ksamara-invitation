@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvitationStatus;
+use App\Helpers\NotificationHelper;
 use App\Repositories\InvitationRepository;
 use App\Services\RsvpService;
 use Illuminate\Http\RedirectResponse;
@@ -20,8 +21,12 @@ class PublicInvitationController extends Controller
     {
         $invitation = $this->invitationRepository->findBySlugWithRelations($slug);
 
-        if (! $invitation || $invitation->status !== InvitationStatus::Published) {
-            abort(404, 'Undangan tidak ditemukan atau belum dipublikasikan.');
+        if (! $invitation) {
+            abort(404, 'Undangan tidak ditemukan.');
+        }
+
+        if ($invitation->status === InvitationStatus::Draft) {
+            abort(403, 'Undangan ini belum dipublikasikan oleh pemilik acara.');
         }
 
         $ogTitle = $invitation->title.' - Undangan Pernikahan';
@@ -48,6 +53,6 @@ class PublicInvitationController extends Controller
 
         $this->rsvpService->submitRsvp($invitation, $validated);
 
-        return redirect()->back()->with('success', 'Terima kasih, RSVP dan ucapan Anda telah terkirim!');
+        return NotificationHelper::backWithSuccess('Terima kasih, RSVP dan ucapan Anda telah terkirim!');
     }
 }

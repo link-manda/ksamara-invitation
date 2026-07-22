@@ -17,7 +17,15 @@ class DigitalEnvelopeService
             $data['invitation_id'] = $invitation->id;
 
             if (isset($data['qr_code_file']) && $data['qr_code_file'] instanceof UploadedFile) {
-                $data['qr_code_path'] = $data['qr_code_file']->store('qr_codes', 'public');
+                if (! $data['qr_code_file']->isValid()) {
+                    throw new \Exception('File QR Code rusak atau tidak terbaca server.');
+                }
+
+                $path = $data['qr_code_file']->store('qr_codes', 'public');
+                if (! $path) {
+                    throw new \Exception('Gagal menyimpan QR Code ke disk.');
+                }
+                $data['qr_code_path'] = $path;
             }
 
             $env = $this->repository->updateOrCreateForInvitation($invitation, $data);

@@ -16,6 +16,11 @@ class InvitationRepository
         return $invitation->update($data);
     }
 
+    public function delete(Invitation $invitation): bool
+    {
+        return $invitation->delete();
+    }
+
     public function findBySlugWithRelations(string $slug): ?Invitation
     {
         return Invitation::with([
