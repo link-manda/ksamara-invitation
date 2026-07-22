@@ -56,28 +56,8 @@
     </flux:sidebar>
 
     <flux:main container>
-        @if (session('success') || session('toast'))
-            <div class="mb-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-zinc-800 dark:text-green-400" role="alert">
-                {{ session('success') ?? session('toast') }}
-            </div>
-        @endif
+        <x-flash-messages />
 
-        @if (session('error'))
-            <div class="mb-4 p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-zinc-800 dark:text-red-400" role="alert">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-4 p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-zinc-800 dark:text-red-400" role="alert">
-                <ul class="list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        
         @yield('content')
     </flux:main>
 

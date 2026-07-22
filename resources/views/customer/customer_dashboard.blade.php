@@ -60,11 +60,15 @@
                         <flux:button href="{{ route('customer.invitations.edit', $invitation->id) }}" size="sm" variant="outline" icon="pencil-square">Edit Undangan</flux:button>
                         <flux:button href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}" size="sm" variant="outline" icon="users">RSVP</flux:button>
                         
-                        <form action="{{ route('customer.invitations.destroy', $invitation->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus permanen? Biaya tidak bisa di-refund!')">
-                            @csrf
-                            @method('DELETE')
-                            <flux:button type="submit" size="sm" variant="danger" icon="trash">Hapus Undangan</flux:button>
-                        </form>
+                        <flux:modal.trigger name="delete-invitation-{{ $invitation->id }}">
+                            <flux:button size="sm" variant="danger" icon="trash">Hapus Undangan</flux:button>
+                        </flux:modal.trigger>
+                        <x-confirm-delete-modal
+                            name="delete-invitation-{{ $invitation->id }}"
+                            :action="route('customer.invitations.destroy', $invitation->id)"
+                            heading="Hapus undangan ini?"
+                            text="Yakin hapus permanen? Biaya tidak bisa di-refund!"
+                        />
 
                         <form action="{{ route('customer.invitations.toggle-status', $invitation->id) }}" method="POST" class="inline-block ml-auto">
                             @csrf

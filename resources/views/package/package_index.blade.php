@@ -35,11 +35,15 @@
                         <flux:table.cell>
                             <div class="flex items-center space-x-2">
                                 <flux:button href="{{ route('admin.packages.edit', $package->id) }}" size="sm" variant="outline">Edit</flux:button>
-                                <form action="{{ route('admin.packages.destroy', $package->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <flux:button type="submit" size="sm" variant="danger">Hapus</flux:button>
-                                </form>
+                                <flux:modal.trigger name="delete-package-{{ $package->id }}">
+                                    <flux:button size="sm" variant="danger">Hapus</flux:button>
+                                </flux:modal.trigger>
+                                <x-confirm-delete-modal
+                                    name="delete-package-{{ $package->id }}"
+                                    :action="route('admin.packages.destroy', $package->id)"
+                                    heading="Hapus paket ini?"
+                                    :text="'Paket \''.$package->name.'\' akan dihapus permanen.'"
+                                />
                             </div>
                         </flux:table.cell>
                     </flux:table.row>

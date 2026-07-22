@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Invitation;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -11,6 +12,7 @@ it('renders the invitation edit page for its owner without errors', function () 
 
     $invitation = Invitation::factory()->create([
         'user_id' => $customer->id,
+        'order_id' => Order::factory()->paid()->create(['user_id' => $customer->id]),
     ]);
 
     $this->actingAs($customer)

@@ -28,6 +28,7 @@ test('admin can create a package', function () {
         'price' => 500000,
         'features' => "QR Code\nUnlimited Guests",
         'is_active' => '1',
+        'max_photos' => 20,
     ]);
 
     $response->assertRedirect(route('admin.packages.index'));
@@ -53,6 +54,7 @@ test('admin can update a package', function () {
         'price' => $package->price,
         'features' => '',
         'is_active' => '0',
+        'max_photos' => 10,
     ]);
 
     $response->assertRedirect(route('admin.packages.index'));

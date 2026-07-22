@@ -46,11 +46,7 @@
     </flux:header>
 
     <flux:main container>
-        @if (session('success'))
-            <div class="mb-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
+        <x-flash-messages />
 
         @yield('content')
     </flux:main>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Invitation;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -12,7 +13,10 @@ it('uploads gallery files and persists them when updating an invitation', functi
     Storage::fake('public');
 
     $customer = User::factory()->create(['role' => 'customer']);
-    $invitation = Invitation::factory()->create(['user_id' => $customer->id]);
+    $invitation = Invitation::factory()->create([
+        'user_id' => $customer->id,
+        'order_id' => Order::factory()->paid()->create(['user_id' => $customer->id]),
+    ]);
 
     $file = UploadedFile::fake()->image('photo.jpg');
 
@@ -35,6 +39,7 @@ it('allows saving invitation details with empty parent names', function () {
     $customer = User::factory()->create(['role' => 'customer']);
     $invitation = Invitation::factory()->create([
         'user_id' => $customer->id,
+        'order_id' => Order::factory()->paid()->create(['user_id' => $customer->id]),
         'groom_parents' => 'Existing',
         'bride_parents' => 'Existing',
     ]);

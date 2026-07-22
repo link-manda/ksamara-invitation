@@ -36,11 +36,15 @@
                 <flux:table.cell>
                     <div class="flex gap-2">
                         <flux:button href="{{ route('admin.templates.edit', $template->id) }}" size="sm" variant="ghost" icon="pencil-square" />
-                        <form action="{{ route('admin.templates.destroy', $template->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus template ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <flux:button type="submit" size="sm" variant="ghost" color="danger" icon="trash" />
-                        </form>
+                        <flux:modal.trigger name="delete-template-{{ $template->id }}">
+                            <flux:button size="sm" variant="ghost" color="danger" icon="trash" />
+                        </flux:modal.trigger>
+                        <x-confirm-delete-modal
+                            name="delete-template-{{ $template->id }}"
+                            :action="route('admin.templates.destroy', $template->id)"
+                            heading="Hapus template ini?"
+                            :text="'Template \''.$template->name.'\' akan dihapus permanen.'"
+                        />
                     </div>
                 </flux:table.cell>
             </flux:table.row>

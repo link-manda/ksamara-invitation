@@ -28,4 +28,9 @@ class OrderFactory extends Factory
             'status' => OrderStatus::Pending,
         ];
     }
+
+    public function paid(): static
+    {
+        return $this->state(fn () => ['status' => OrderStatus::Paid]);
+    }
 }

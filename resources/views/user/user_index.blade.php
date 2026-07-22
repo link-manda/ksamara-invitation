@@ -30,11 +30,15 @@
                 <flux:table.cell>
                     <div class="flex gap-2">
                         <flux:button href="{{ route('admin.users.edit', $user->id) }}" size="sm" variant="ghost" icon="pencil-square" />
-                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <flux:button type="submit" size="sm" variant="ghost" color="danger" icon="trash" />
-                        </form>
+                        <flux:modal.trigger name="delete-user-{{ $user->id }}">
+                            <flux:button size="sm" variant="ghost" color="danger" icon="trash" />
+                        </flux:modal.trigger>
+                        <x-confirm-delete-modal
+                            name="delete-user-{{ $user->id }}"
+                            :action="route('admin.users.destroy', $user->id)"
+                            heading="Hapus pelanggan ini?"
+                            :text="'Data pelanggan \''.$user->name.'\' akan dihapus permanen.'"
+                        />
                     </div>
                 </flux:table.cell>
             </flux:table.row>
