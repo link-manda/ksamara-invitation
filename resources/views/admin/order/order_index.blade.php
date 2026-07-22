@@ -39,7 +39,7 @@
                 </flux:table.cell>
                 <flux:table.cell>
                     @if($order->status === \App\Enums\OrderStatus::Pending)
-                        <form action="{{ route('orders.mark-paid', $order->id) }}" method="POST">
+                        <form action="{{ route('admin.orders.mark-paid', $order->id) }}" method="POST">
                             @csrf
                             @method('PATCH')
                             <flux:button type="submit" size="sm" variant="outline" icon="check-circle" class="text-green-600 hover:text-green-700">Tandai Lunas</flux:button>

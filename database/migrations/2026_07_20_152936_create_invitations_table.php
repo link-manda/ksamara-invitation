@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->foreignId('order_id')->constrained()->restrictOnDelete();
             $table->foreignId('template_id')->constrained()->restrictOnDelete();
             $table->string('slug')->unique();

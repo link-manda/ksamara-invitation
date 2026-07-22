@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Halaman Tidak Ditemukan')
+@section('code', '404')
+@section('message', 'Tersesat di Pulau Dewata?')
+@section('description', 'Halaman undangan atau rute yang Anda cari tidak dapat kami temukan di sistem.')

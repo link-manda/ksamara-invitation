@@ -7,7 +7,7 @@
 </div>
 
 <flux:card>
-    <form action="{{ route('settings.update') }}" method="POST">
+    <form action="{{ route('admin.settings.update') }}" method="POST">
         @csrf
         @method('PUT')
         
