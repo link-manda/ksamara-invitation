@@ -7,39 +7,32 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PackageRepository
 {
-    /**
-     * @return Collection<int, Package>
-     */
-    public function all(): Collection
+    public function getAll(): Collection
     {
-        return Package::latest()->get();
+        return Package::all();
     }
 
-    public function find(Package $package): Package
+    public function getById(int $id): ?Package
     {
-        return $package;
+        return Package::findOrFail($id);
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function insert(array $data): Package
+    public function create(array $data): Package
     {
         return Package::create($data);
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function update(Package $package, array $data): Package
+    public function update(int $id, array $data): bool
     {
-        $package->update($data);
+        $package = Package::findOrFail($id);
 
-        return $package;
+        return $package->update($data);
     }
 
-    public function delete(Package $package): void
+    public function delete(int $id): bool
     {
-        $package->delete();
+        $package = Package::findOrFail($id);
+
+        return $package->delete();
     }
 }

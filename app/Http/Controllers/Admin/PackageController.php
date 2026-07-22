@@ -3,65 +3,68 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StorePackageRequest;
-use App\Http\Requests\Admin\UpdatePackageRequest;
-use App\Models\Package;
 use App\Services\PackageService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PackageController extends Controller
 {
-    public function __construct(private readonly PackageService $packages) {}
+    public function __construct(
+        protected PackageService $packageService
+    ) {}
 
     public function index(): View
     {
-        return view('package.package_index', ['packages' => $this->packages->list()]);
+        $packages = $this->packageService->getAllPackages();
+
+        return view('package.package_index', compact('packages'));
     }
 
     public function create(): View
     {
-        return view('package.package_form', ['package' => new Package]);
+        return view('package.package_form');
     }
 
-    public function store(StorePackageRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $this->packages->create($this->featuresToArray($request->validated()));
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'features' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
 
-        return redirect()->route('admin.packages.index')->with('status', __('Package created.'));
+        $this->packageService->createPackage($validated);
+
+        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil ditambahkan.');
     }
 
-    public function edit(Package $package): View
+    public function edit(int $id): View
     {
-        return view('package.package_form', ['package' => $package]);
+        $package = $this->packageService->getPackageById($id);
+
+        return view('package.package_form', compact('package'));
     }
 
-    public function update(UpdatePackageRequest $request, Package $package): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
-        $this->packages->update($package, $this->featuresToArray($request->validated()));
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'features' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
 
-        return redirect()->route('admin.packages.index')->with('status', __('Package updated.'));
+        $this->packageService->updatePackage($id, $validated);
+
+        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil diperbarui.');
     }
 
-    public function destroy(Package $package): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
-        $this->packages->delete($package);
+        $this->packageService->deletePackage($id);
 
-        return redirect()->route('admin.packages.index')->with('status', __('Package deleted.'));
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    private function featuresToArray(array $data): array
-    {
-        $data['features'] = collect(explode("\n", (string) ($data['features'] ?? '')))
-            ->map(fn (string $line) => trim($line))
-            ->filter()
-            ->values()
-            ->all();
-
-        return $data;
+        return redirect()->route('admin.packages.index')->with('success', 'Paket berhasil dihapus.');
     }
 }

@@ -1,61 +1,60 @@
-<x-layouts::admin>
-    <h1 class="text-xl font-semibold">
-        {{ $package->exists ? __('Edit Package') : __('New Package') }}
-    </h1>
+@extends('layouts.admin')
 
-    <form
-        method="POST"
-        action="{{ $package->exists ? route('admin.packages.update', $package) : route('admin.packages.store') }}"
-        class="mt-6 max-w-lg space-y-4"
-    >
-        @csrf
-        @if ($package->exists)
-            @method('PUT')
-        @endif
+@section('content')
+    <div class="mb-6">
+        <flux:breadcrumbs>
+            <flux:breadcrumbs.item href="{{ route('admin.packages.index') }}">Paket</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item>{{ isset($package) ? 'Edit Paket' : 'Tambah Paket' }}</flux:breadcrumbs.item>
+        </flux:breadcrumbs>
 
-        <div>
-            <label for="name" class="block text-sm font-medium">{{ __('Name') }}</label>
-            <input type="text" name="name" id="name" value="{{ old('name', $package->name) }}"
-                class="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800">
-            @error('name')
-                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-            @enderror
-        </div>
+        <flux:heading size="xl" level="1" class="mt-4">{{ isset($package) ? 'Edit Paket' : 'Tambah Paket' }}</flux:heading>
+        <flux:subheading>Lengkapi form di bawah ini untuk {{ isset($package) ? 'mengubah' : 'menambahkan' }} paket undangan.</flux:subheading>
+    </div>
 
-        <div>
-            <label for="price" class="block text-sm font-medium">{{ __('Price') }}</label>
-            <input type="number" name="price" id="price" value="{{ old('price', $package->price) }}"
-                class="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800">
-            @error('price')
-                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-            @enderror
-        </div>
+    <flux:card>
+        <form action="{{ isset($package) ? route('admin.packages.update', $package->id) : route('admin.packages.store') }}" method="POST">
+            @csrf
+            @if(isset($package))
+                @method('PUT')
+            @endif
 
-        <div>
-            <label for="features" class="block text-sm font-medium">{{ __('Features') }}</label>
-            <textarea name="features" id="features" rows="4"
-                placeholder="{{ __('One feature per line') }}"
-                class="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800">{{ old('features', is_array($package->features) ? implode("\n", $package->features) : '') }}</textarea>
-            @error('features')
-                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-            @enderror
-        </div>
+            <div class="space-y-6">
+                <flux:input 
+                    name="name" 
+                    label="Nama Paket" 
+                    placeholder="Contoh: Paket Premium" 
+                    value="{{ old('name', $package->name ?? '') }}" 
+                    required 
+                />
 
-        <div class="flex items-center gap-2">
-            <input type="hidden" name="is_active" value="0">
-            <input type="checkbox" name="is_active" id="is_active" value="1"
-                @checked(old('is_active', $package->is_active))
-                class="rounded border-zinc-300 dark:border-zinc-700">
-            <label for="is_active" class="text-sm font-medium">{{ __('Active') }}</label>
-        </div>
+                <flux:input 
+                    name="price" 
+                    type="number" 
+                    label="Harga (Rp)" 
+                    placeholder="Contoh: 150000" 
+                    value="{{ old('price', $package->price ?? '') }}" 
+                    required 
+                />
 
-        <div class="flex gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900">
-                {{ __('Save') }}
-            </button>
-            <a href="{{ route('admin.packages.index') }}" class="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium dark:border-zinc-700">
-                {{ __('Cancel') }}
-            </a>
-        </div>
-    </form>
-</x-layouts::admin>
+                <flux:textarea 
+                    name="features" 
+                    label="Fitur (Pisahkan dengan baris baru)" 
+                    placeholder="RSVP&#10;Galeri Foto&#10;Buku Tamu" 
+                    rows="5"
+                >{{ old('features', isset($package) && is_array($package->features) ? implode("\n", $package->features) : (isset($package) && is_string($package->features) ? $package->features : '')) }}</flux:textarea>
+
+                <flux:checkbox 
+                    name="is_active" 
+                    label="Aktifkan paket ini?" 
+                    value="1" 
+                    :checked="old('is_active', $package->is_active ?? true)"
+                />
+            </div>
+
+            <div class="flex mt-6 space-x-2">
+                <flux:button type="submit" variant="primary">Simpan</flux:button>
+                <flux:button href="{{ route('admin.packages.index') }}" variant="outline">Batal</flux:button>
+            </div>
+        </form>
+    </flux:card>
+@endsection

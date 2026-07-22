@@ -1,46 +1,54 @@
-<x-layouts::admin>
-    <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold">{{ __('Packages') }}</h1>
-        <a href="{{ route('admin.packages.create') }}" class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900">
-            {{ __('New Package') }}
-        </a>
+@extends('layouts.admin')
+
+@section('content')
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <flux:heading size="xl" level="1">Manajemen Paket</flux:heading>
+            <flux:subheading>Daftar semua paket undangan yang tersedia.</flux:subheading>
+        </div>
+        <flux:button href="{{ route('admin.packages.create') }}" variant="primary" icon="plus">Tambah Paket</flux:button>
     </div>
 
-    <div class="mt-6 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-        <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
-            <thead class="bg-zinc-50 dark:bg-zinc-900">
-                <tr>
-                    <th class="px-4 py-3 text-left font-medium">{{ __('Name') }}</th>
-                    <th class="px-4 py-3 text-left font-medium">{{ __('Price') }}</th>
-                    <th class="px-4 py-3 text-left font-medium">{{ __('Status') }}</th>
-                    <th class="px-4 py-3 text-right font-medium">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+    <flux:card>
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>ID</flux:table.column>
+                <flux:table.column>Nama Paket</flux:table.column>
+                <flux:table.column>Harga</flux:table.column>
+                <flux:table.column>Status</flux:table.column>
+                <flux:table.column>Aksi</flux:table.column>
+            </flux:table.columns>
+
+            <flux:table.rows>
                 @forelse ($packages as $package)
-                    <tr>
-                        <td class="px-4 py-3">{{ $package->name }}</td>
-                        <td class="px-4 py-3">Rp{{ number_format($package->price, 0, ',', '.') }}</td>
-                        <td class="px-4 py-3">
-                            <span class="rounded-full px-2 py-1 text-xs {{ $package->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400' }}">
-                                {{ $package->is_active ? __('Active') : __('Inactive') }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.packages.edit', $package) }}" class="text-zinc-600 hover:underline dark:text-zinc-300">{{ __('Edit') }}</a>
-                            <form method="POST" action="{{ route('admin.packages.destroy', $package) }}" class="inline" onsubmit="return confirm('{{ __('Delete this package?') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="ml-3 text-red-600 hover:underline dark:text-red-400">{{ __('Delete') }}</button>
-                            </form>
-                        </td>
-                    </tr>
+                    <flux:table.row>
+                        <flux:table.cell>{{ $package->id }}</flux:table.cell>
+                        <flux:table.cell>{{ $package->name }}</flux:table.cell>
+                        <flux:table.cell>Rp {{ number_format($package->price, 0, ',', '.') }}</flux:table.cell>
+                        <flux:table.cell>
+                            @if ($package->is_active)
+                                <flux:badge color="green" size="sm">Aktif</flux:badge>
+                            @else
+                                <flux:badge color="zinc" size="sm">Non-aktif</flux:badge>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <div class="flex items-center space-x-2">
+                                <flux:button href="{{ route('admin.packages.edit', $package->id) }}" size="sm" variant="outline">Edit</flux:button>
+                                <form action="{{ route('admin.packages.destroy', $package->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:button type="submit" size="sm" variant="danger">Hapus</flux:button>
+                                </form>
+                            </div>
+                        </flux:table.cell>
+                    </flux:table.row>
                 @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-zinc-500">{{ __('No packages yet.') }}</td>
-                    </tr>
+                    <flux:table.row>
+                        <flux:table.cell colspan="5" class="text-center text-zinc-500">Belum ada paket yang ditambahkan.</flux:table.cell>
+                    </flux:table.row>
                 @endforelse
-            </tbody>
-        </table>
-    </div>
-</x-layouts::admin>
+            </flux:table.rows>
+        </flux:table>
+    </flux:card>
+@endsection

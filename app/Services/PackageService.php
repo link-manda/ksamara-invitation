@@ -8,34 +8,52 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PackageService
 {
-    public function __construct(private readonly PackageRepository $packages) {}
+    public function __construct(
+        protected PackageRepository $packageRepository
+    ) {}
 
-    /**
-     * @return Collection<int, Package>
-     */
-    public function list(): Collection
+    public function getAllPackages(): Collection
     {
-        return $this->packages->all();
+        return $this->packageRepository->getAll();
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function create(array $data): Package
+    public function getPackageById(int $id): ?Package
     {
-        return $this->packages->insert($data);
+        return $this->packageRepository->getById($id);
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function update(Package $package, array $data): Package
+    public function createPackage(array $data): Package
     {
-        return $this->packages->update($package, $data);
+        // Parse features string into array
+        if (isset($data['features']) && is_string($data['features'])) {
+            $features = array_filter(array_map('trim', explode("\n", $data['features'])));
+            $data['features'] = array_values($features);
+        } else {
+            $data['features'] = [];
+        }
+
+        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
+
+        return $this->packageRepository->create($data);
     }
 
-    public function delete(Package $package): void
+    public function updatePackage(int $id, array $data): bool
     {
-        $this->packages->delete($package);
+        // Parse features string into array
+        if (isset($data['features']) && is_string($data['features'])) {
+            $features = array_filter(array_map('trim', explode("\n", $data['features'])));
+            $data['features'] = array_values($features);
+        } else {
+            $data['features'] = [];
+        }
+
+        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
+
+        return $this->packageRepository->update($id, $data);
+    }
+
+    public function deletePackage(int $id): bool
+    {
+        return $this->packageRepository->delete($id);
     }
 }
