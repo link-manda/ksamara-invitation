@@ -21,7 +21,7 @@
         <flux:navbar class="max-lg:hidden">
             <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
             <flux:navbar.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navbar.item>
-            <flux:navbar.item href="#">Pesanan Saya</flux:navbar.item>
+            <flux:navbar.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navbar.item>
             <form method="POST" action="{{ route('logout') }}" class="inline-block">
                 @csrf
                 <flux:navbar.item as="button" type="submit">
@@ -45,7 +45,7 @@
         <flux:navlist variant="outline">
             <flux:navlist.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
             <flux:navlist.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navlist.item>
-            <flux:navlist.item href="#">Pesanan Saya</flux:navlist.item>
+            <flux:navlist.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navlist.item>
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <flux:navlist.item as="button" type="submit" class="w-full text-left">

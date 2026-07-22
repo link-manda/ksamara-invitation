@@ -54,4 +54,15 @@ class InvitationService
     {
         return $this->invitationRepository->update($invitation, $data);
     }
+
+    public function toggleStatus(Invitation $invitation): bool
+    {
+        $newStatus = match ($invitation->status) {
+            InvitationStatus::Draft => InvitationStatus::Published,
+            InvitationStatus::Published => InvitationStatus::Inactive,
+            InvitationStatus::Inactive => InvitationStatus::Published,
+        };
+
+        return $this->invitationRepository->update($invitation, ['status' => $newStatus]);
+    }
 }

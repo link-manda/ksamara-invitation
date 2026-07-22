@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository
 {
+    public function countCustomers(): int
+    {
+        return User::where('role', 'customer')->count();
+    }
+
     public function isAdmin(User $user): bool
     {
         return $user->role === UserRole::Admin;

@@ -110,4 +110,17 @@ class InvitationController extends Controller
 
         return redirect()->back()->with('toast', 'Detail undangan berhasil disimpan!');
     }
+
+    public function toggleStatus(Request $request, int $id): RedirectResponse
+    {
+        $invitation = Invitation::findOrFail($id);
+
+        if ($invitation->user_id !== $request->user()->id) {
+            abort(403, 'Anda tidak diizinkan mengubah status undangan ini.');
+        }
+
+        $this->invitationService->toggleStatus($invitation);
+
+        return redirect()->back()->with('toast', 'Status undangan berhasil diubah!');
+    }
 }

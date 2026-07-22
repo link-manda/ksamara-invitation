@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InvitationStatus;
 use App\Repositories\InvitationRepository;
 use App\Services\RsvpService;
 use Illuminate\Http\RedirectResponse;
@@ -19,13 +20,15 @@ class PublicInvitationController extends Controller
     {
         $invitation = $this->invitationRepository->findBySlugWithRelations($slug);
 
-        if (! $invitation) {
-            abort(404, 'Undangan tidak ditemukan.');
+        if (! $invitation || $invitation->status !== InvitationStatus::Published) {
+            abort(404, 'Undangan tidak ditemukan atau belum dipublikasikan.');
         }
 
-        $view = $invitation->template->view_path;
+        $ogTitle = $invitation->title.' - Undangan Pernikahan';
+        $ogDescription = 'Kami mengundang Anda untuk hadir di acara pernikahan kami.';
+        $ogImage = $invitation->galleries->isNotEmpty() ? asset('storage/'.$invitation->galleries->first()->file_path) : asset('img/default-og.jpg');
 
-        return view($view, compact('invitation'));
+        return view('templates.'.$invitation->template->view_path, compact('invitation', 'ogTitle', 'ogDescription', 'ogImage'));
     }
 
     public function rsvp(Request $request, string $slug): RedirectResponse

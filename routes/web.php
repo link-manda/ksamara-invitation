@@ -1,17 +1,26 @@
 <?php
 
+use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\InvitationController;
+use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\RsvpController;
+use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\PublicInvitationController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified', 'customer'])->group(function () {
-    Route::view('dashboard', 'customer.customer_dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::get('invitations/create', [InvitationController::class, 'create'])->name('customer.invitations.create');
     Route::post('invitations', [InvitationController::class, 'store'])->name('customer.invitations.store');
     Route::get('invitations/{id}/edit', [InvitationController::class, 'edit'])->name('customer.invitations.edit');
     Route::put('invitations/{id}', [InvitationController::class, 'update'])->name('customer.invitations.update');
+    Route::patch('invitations/{id}/toggle-status', [InvitationController::class, 'toggleStatus'])->name('customer.invitations.toggle-status');
+    Route::get('invitations/{id}/rsvps', [RsvpController::class, 'index'])->name('customer.invitations.rsvps.index');
+
+    Route::get('orders', [OrderController::class, 'index'])->name('customer.orders.index');
 });
 
 require __DIR__.'/settings.php';

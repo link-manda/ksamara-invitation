@@ -20,9 +20,11 @@
 
         <flux:navlist variant="outline">
             <flux:navlist.item icon="home" href="{{ route('admin.dashboard') }}" :current="request()->routeIs('admin.dashboard')">Dashboard</flux:navlist.item>
-            <flux:navlist.item icon="users" href="{{ route('admin.users.index') }}" :current="request()->routeIs('admin.users.*')">Pelanggan</flux:navlist.item>
-            <flux:navlist.item icon="square-3-stack-3d" href="{{ route('admin.packages.index') }}" :current="request()->routeIs('admin.packages.*')">Paket</flux:navlist.item>
-            <flux:navlist.item icon="swatch" href="{{ route('admin.templates.index') }}" :current="request()->routeIs('admin.templates.*')">Template</flux:navlist.item>
+            <flux:navlist.item icon="users" href="{{ route('users.index') }}" :current="request()->routeIs('users.*')">Pelanggan</flux:navlist.item>
+            <flux:navlist.item icon="credit-card" href="{{ route('orders.index') }}" :current="request()->routeIs('orders.*')">Pesanan</flux:navlist.item>
+            <flux:navlist.item icon="square-3-stack-3d" href="{{ route('packages.index') }}" :current="request()->routeIs('packages.*')">Paket</flux:navlist.item>
+            <flux:navlist.item icon="swatch" href="{{ route('templates.index') }}" :current="request()->routeIs('templates.*')">Template</flux:navlist.item>
+            <flux:navlist.item icon="cog-8-tooth" href="{{ route('settings.edit') }}" :current="request()->routeIs('settings.*')">Pengaturan</flux:navlist.item>
         </flux:navlist>
 
         <flux:spacer />
