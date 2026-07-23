@@ -14,7 +14,7 @@
             <flux:table.column>Paket</flux:table.column>
             <flux:table.column>Tagihan</flux:table.column>
             <flux:table.column>Status</flux:table.column>
-            <flux:table.column>Aksi</flux:table.column>
+            <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @forelse($orders as $order)
@@ -37,16 +37,25 @@
                         <flux:badge color="danger">Batal</flux:badge>
                     @endif
                 </flux:table.cell>
-                <flux:table.cell>
-                    @if($order->status === \App\Enums\OrderStatus::Pending)
-                        <form action="{{ route('admin.orders.mark-paid', $order->id) }}" method="POST">
-                            @csrf
-                            @method('PATCH')
-                            <flux:button type="submit" size="sm" variant="outline" icon="check-circle" class="text-green-600 hover:text-green-700">Tandai Lunas</flux:button>
-                        </form>
-                    @else
-                        <span class="text-slate-400 text-sm">Selesai</span>
-                    @endif
+                <flux:table.cell align="center">
+                    <flux:dropdown align="end">
+                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                        <flux:menu>
+                            @if($order->status === \App\Enums\OrderStatus::Pending)
+                                <form action="{{ route('admin.orders.mark-paid', $order->id) }}" method="POST" class="w-full">
+                                    @csrf
+                                    @method('PATCH')
+                                    <flux:menu.item type="submit" icon="check-circle">
+                                        Tandai Lunas
+                                    </flux:menu.item>
+                                </form>
+                            @else
+                                <flux:menu.item icon="information-circle" disabled>
+                                    Tidak Ada Aksi
+                                </flux:menu.item>
+                            @endif
+                        </flux:menu>
+                    </flux:dropdown>
                 </flux:table.cell>
             </flux:table.row>
             @empty

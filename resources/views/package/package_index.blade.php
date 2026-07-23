@@ -16,7 +16,7 @@
                 <flux:table.column>Nama Paket</flux:table.column>
                 <flux:table.column>Harga</flux:table.column>
                 <flux:table.column>Status</flux:table.column>
-                <flux:table.column>Aksi</flux:table.column>
+                <flux:table.column align="center">Aksi</flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
@@ -32,19 +32,23 @@
                                 <flux:badge color="zinc" size="sm">Non-aktif</flux:badge>
                             @endif
                         </flux:table.cell>
-                        <flux:table.cell>
-                            <div class="flex items-center space-x-2">
-                                <flux:button href="{{ route('admin.packages.edit', $package->id) }}" size="sm" variant="outline">Edit</flux:button>
-                                <flux:modal.trigger name="delete-package-{{ $package->id }}">
-                                    <flux:button size="sm" variant="danger">Hapus</flux:button>
-                                </flux:modal.trigger>
-                                <x-confirm-delete-modal
-                                    name="delete-package-{{ $package->id }}"
-                                    :action="route('admin.packages.destroy', $package->id)"
-                                    heading="Hapus paket ini?"
-                                    :text="'Paket \''.$package->name.'\' akan dihapus permanen.'"
-                                />
-                            </div>
+                        <flux:table.cell align="center">
+                            <flux:dropdown align="end">
+                                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                                <flux:menu>
+                                    <flux:menu.item icon="pencil-square" href="{{ route('admin.packages.edit', $package->id) }}">
+                                        Edit Paket
+                                    </flux:menu.item>
+                                    <flux:menu.separator />
+                                    <form action="{{ route('admin.packages.destroy', $package->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');" class="w-full">
+                                        @csrf
+                                        @method('DELETE')
+                                        <flux:menu.item type="submit" icon="trash" variant="danger">
+                                            Hapus Paket
+                                        </flux:menu.item>
+                                    </form>
+                                </flux:menu>
+                            </flux:dropdown>
                         </flux:table.cell>
                     </flux:table.row>
                 @empty

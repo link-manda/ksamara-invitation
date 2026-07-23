@@ -33,6 +33,7 @@
             <flux:table.column>Jumlah Orang</flux:table.column>
             <flux:table.column>Waktu</flux:table.column>
             <flux:table.column>Pesan / Ucapan</flux:table.column>
+            <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @forelse($rsvps as $rsvp)
@@ -56,10 +57,24 @@
                         {{ $rsvp->message ?? '-' }}
                     </div>
                 </flux:table.cell>
+                <flux:table.cell align="center">
+                    <flux:dropdown align="end">
+                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                        <flux:menu>
+                            <form action="{{ route('customer.rsvp.destroy', $rsvp->id) }}" method="POST" onsubmit="return confirm('Hapus ucapan/RSVP tamu ini?');" class="w-full">
+                                @csrf
+                                @method('DELETE')
+                                <flux:menu.item type="submit" icon="trash" variant="danger">
+                                    Hapus RSVP
+                                </flux:menu.item>
+                            </form>
+                        </flux:menu>
+                    </flux:dropdown>
+                </flux:table.cell>
             </flux:table.row>
             @empty
             <flux:table.row>
-                <flux:table.cell colspan="5" class="text-center text-slate-500 py-6">
+                <flux:table.cell colspan="6" class="text-center text-slate-500 py-6">
                     Belum ada data RSVP yang masuk.
                 </flux:table.cell>
             </flux:table.row>

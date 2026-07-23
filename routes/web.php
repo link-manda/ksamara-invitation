@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Route::patch('invitations/{id}/toggle-status', [InvitationController::class, 'toggleStatus'])->name('customer.invitations.toggle-status');
     Route::delete('invitations/{id}', [InvitationController::class, 'destroy'])->name('customer.invitations.destroy');
     Route::get('invitations/{id}/rsvps', [RsvpController::class, 'index'])->name('customer.invitations.rsvps.index');
+    Route::delete('rsvps/{id}', [RsvpController::class, 'destroy'])->name('customer.rsvp.destroy');
 
     Route::get('orders', [OrderController::class, 'index'])->name('customer.orders.index');
 });

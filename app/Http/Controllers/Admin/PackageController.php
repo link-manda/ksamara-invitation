@@ -38,6 +38,9 @@ class PackageController extends Controller
             'enable_bgm' => ['nullable', 'boolean'],
         ]);
 
+        $validated['is_active'] = $request->boolean('is_active');
+        $validated['enable_bgm'] = $request->boolean('enable_bgm');
+
         $this->packageService->createPackage($validated);
 
         return NotificationHelper::redirectSuccess('admin.packages.index', 'Paket berhasil ditambahkan.');
@@ -60,6 +63,9 @@ class PackageController extends Controller
             'max_photos' => ['required', 'integer', 'min:0'],
             'enable_bgm' => ['nullable', 'boolean'],
         ]);
+
+        $validated['is_active'] = $request->boolean('is_active');
+        $validated['enable_bgm'] = $request->boolean('enable_bgm');
 
         $this->packageService->updatePackage($id, $validated);
 

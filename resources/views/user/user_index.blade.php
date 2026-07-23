@@ -16,7 +16,7 @@
             <flux:table.column>Email</flux:table.column>
             <flux:table.column>No. HP</flux:table.column>
             <flux:table.column>Tanggal Daftar</flux:table.column>
-            <flux:table.column>Aksi</flux:table.column>
+            <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @foreach($users as $user)
@@ -27,19 +27,23 @@
                 <flux:table.cell>{{ $user->email }}</flux:table.cell>
                 <flux:table.cell>{{ $user->phone_number ?? '-' }}</flux:table.cell>
                 <flux:table.cell>{{ $user->created_at->format('d M Y') }}</flux:table.cell>
-                <flux:table.cell>
-                    <div class="flex gap-2">
-                        <flux:button href="{{ route('admin.users.edit', $user->id) }}" size="sm" variant="ghost" icon="pencil-square" />
-                        <flux:modal.trigger name="delete-user-{{ $user->id }}">
-                            <flux:button size="sm" variant="ghost" color="danger" icon="trash" />
-                        </flux:modal.trigger>
-                        <x-confirm-delete-modal
-                            name="delete-user-{{ $user->id }}"
-                            :action="route('admin.users.destroy', $user->id)"
-                            heading="Hapus pelanggan ini?"
-                            :text="'Data pelanggan \''.$user->name.'\' akan dihapus permanen.'"
-                        />
-                    </div>
+                <flux:table.cell align="center">
+                    <flux:dropdown align="end">
+                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                        <flux:menu>
+                            <flux:menu.item icon="pencil-square" href="{{ route('admin.users.edit', $user->id) }}">
+                                Edit Pengguna
+                            </flux:menu.item>
+                            <flux:menu.separator />
+                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');" class="w-full">
+                                @csrf
+                                @method('DELETE')
+                                <flux:menu.item type="submit" icon="trash" variant="danger">
+                                    Hapus Pengguna
+                                </flux:menu.item>
+                            </form>
+                        </flux:menu>
+                    </flux:dropdown>
                 </flux:table.cell>
             </flux:table.row>
             @endforeach

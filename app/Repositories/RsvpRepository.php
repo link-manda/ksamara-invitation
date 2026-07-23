@@ -24,4 +24,9 @@ class RsvpRepository
             ->where('status', RsvpStatus::Hadir)
             ->sum('guest_count');
     }
+
+    public function delete(int $id): bool
+    {
+        return (bool) Rsvp::where('id', $id)->delete();
+    }
 }

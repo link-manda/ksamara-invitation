@@ -51,18 +51,28 @@
                     required 
                 />
 
+                @php
+                    $isActive = session()->hasOldInput() 
+                        ? (bool) old('is_active') 
+                        : (bool) ($package->is_active ?? true);
+
+                    $enableBgm = session()->hasOldInput() 
+                        ? (bool) old('enable_bgm') 
+                        : (bool) ($package->enable_bgm ?? false);
+                @endphp
+
                 <flux:checkbox 
                     name="is_active" 
                     label="Aktifkan paket ini?" 
                     value="1" 
-                    :checked="old('is_active', $package->is_active ?? true)"
+                    :checked="$isActive"
                 />
 
                 <flux:checkbox 
                     name="enable_bgm" 
                     label="Izinkan BGM (Background Music)?" 
                     value="1" 
-                    :checked="old('enable_bgm', $package->enable_bgm ?? false)"
+                    :checked="$enableBgm"
                 />
             </div>
 

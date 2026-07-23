@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Enums\OrderStatus;
 use App\Enums\RsvpStatus;
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
+use App\Models\Rsvp;
 use App\Repositories\RsvpRepository;
-use App\Helpers\NotificationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +25,7 @@ class RsvpController extends Controller
             abort(403, 'Anda tidak diizinkan mengakses data ini.');
         }
 
-        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk melihat daftar RSVP.');
         }
 
@@ -37,5 +39,18 @@ class RsvpController extends Controller
         ];
 
         return view('customer.invitation.rsvp_index', compact('invitation', 'rsvps', 'stats'));
+    }
+
+    public function destroy(Request $request, int $id): RedirectResponse
+    {
+        $rsvp = Rsvp::with('invitation')->findOrFail($id);
+
+        if ($rsvp->invitation->user_id !== $request->user()->id) {
+            abort(403, 'Anda tidak diizinkan menghapus data ini.');
+        }
+
+        $this->rsvpRepository->delete($id);
+
+        return NotificationHelper::backWithSuccess('Data RSVP berhasil dihapus.');
     }
 }

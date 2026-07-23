@@ -14,7 +14,7 @@
             <flux:table.column>Total Tagihan</flux:table.column>
             <flux:table.column>Status</flux:table.column>
             <flux:table.column>Tanggal</flux:table.column>
-            <flux:table.column>Aksi</flux:table.column>
+            <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @forelse($orders as $order)
@@ -34,14 +34,26 @@
                     @endif
                 </flux:table.cell>
                 <flux:table.cell>{{ $order->created_at->format('d M Y') }}</flux:table.cell>
-                <flux:table.cell>
-                    @if($order->status === \App\Enums\OrderStatus::Pending)
-                        <flux:modal.trigger name="payment-modal-{{ $order->id }}">
-                            <flux:button size="sm" variant="primary" icon="qr-code">Bayar Sekarang</flux:button>
-                        </flux:modal.trigger>
-                    @else
-                        <span class="text-slate-400 text-sm">Selesai</span>
-                    @endif
+                <flux:table.cell align="center">
+                    <flux:dropdown align="end">
+                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                        <flux:menu>
+                            @if($order->status === \App\Enums\OrderStatus::Pending)
+                                <flux:modal.trigger name="payment-modal-{{ $order->id }}">
+                                    <flux:menu.item icon="qr-code">
+                                        Bayar Sekarang (QRIS)
+                                    </flux:menu.item>
+                                </flux:modal.trigger>
+                            @endif
+                            @php
+                                $waMessage = urlencode("Halo Admin Samara, saya ingin menanyakan pesanan #ORD-".str_pad($order->id, 5, '0', STR_PAD_LEFT));
+                                $waLink = "https://wa.me/6281234567890?text=" . $waMessage;
+                            @endphp
+                            <flux:menu.item icon="chat-bubble-left-right" href="{{ $waLink }}" target="_blank">
+                                Hubungi CS
+                            </flux:menu.item>
+                        </flux:menu>
+                    </flux:dropdown>
                 </flux:table.cell>
             </flux:table.row>
             @empty

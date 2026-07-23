@@ -56,27 +56,40 @@
                         @endif
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                        <flux:button href="{{ route('customer.invitations.edit', $invitation->id) }}" size="sm" variant="outline" icon="pencil-square">Edit Undangan</flux:button>
-                        <flux:button href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}" size="sm" variant="outline" icon="users">RSVP</flux:button>
-                        
-                        <flux:modal.trigger name="delete-invitation-{{ $invitation->id }}">
-                            <flux:button size="sm" variant="danger" icon="trash">Hapus Undangan</flux:button>
-                        </flux:modal.trigger>
-                        <x-confirm-delete-modal
-                            name="delete-invitation-{{ $invitation->id }}"
-                            :action="route('customer.invitations.destroy', $invitation->id)"
-                            heading="Hapus undangan ini?"
-                            text="Yakin hapus permanen? Biaya tidak bisa di-refund!"
-                        />
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                        <span class="text-xs text-slate-500 font-medium">Aksi</span>
+                        <flux:dropdown align="end">
+                            <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                            <flux:menu>
+                                <flux:menu.item icon="pencil-square" href="{{ route('customer.invitations.edit', $invitation->id) }}">
+                                    Edit Data Undangan
+                                </flux:menu.item>
+                                <flux:menu.item icon="arrow-top-right-on-square" href="{{ route('public.invitation.show', $invitation->slug) }}" target="_blank">
+                                    Lihat Undangan Live
+                                </flux:menu.item>
+                                <flux:menu.item icon="users" href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}">
+                                    Daftar RSVP & Tamu
+                                </flux:menu.item>
+                                
+                                <form action="{{ route('customer.invitations.toggle-status', $invitation->id) }}" method="POST" class="w-full">
+                                    @csrf
+                                    @method('PATCH')
+                                    <flux:menu.item type="submit" icon="{{ $invitation->status === \App\Enums\InvitationStatus::Published ? 'eye-slash' : 'eye' }}">
+                                        {{ $invitation->status === \App\Enums\InvitationStatus::Published ? 'Unpublish Undangan' : 'Publish Undangan' }}
+                                    </flux:menu.item>
+                                </form>
 
-                        <form action="{{ route('customer.invitations.toggle-status', $invitation->id) }}" method="POST" class="inline-block ml-auto">
-                            @csrf
-                            @method('PATCH')
-                            <flux:button type="submit" size="sm" variant="{{ $invitation->status === \App\Enums\InvitationStatus::Published ? 'danger' : 'primary' }}">
-                                {{ $invitation->status === \App\Enums\InvitationStatus::Published ? 'Unpublish' : 'Publish' }}
-                            </flux:button>
-                        </form>
+                                <flux:menu.separator />
+
+                                <form action="{{ route('customer.invitations.destroy', $invitation->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data undangan ini? Biaya tidak dapat di-refund.');" class="w-full">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:menu.item type="submit" icon="trash" variant="danger">
+                                        Hapus Undangan
+                                    </flux:menu.item>
+                                </form>
+                            </flux:menu>
+                        </flux:dropdown>
                     </div>
                 </flux:card>
             @endforeach

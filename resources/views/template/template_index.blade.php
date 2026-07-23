@@ -15,7 +15,7 @@
             <flux:table.column>Nama Template</flux:table.column>
             <flux:table.column>View Path</flux:table.column>
             <flux:table.column>Status</flux:table.column>
-            <flux:table.column>Aksi</flux:table.column>
+            <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @foreach($templates as $template)
@@ -33,19 +33,23 @@
                         <flux:badge color="red" size="sm">Tidak Aktif</flux:badge>
                     @endif
                 </flux:table.cell>
-                <flux:table.cell>
-                    <div class="flex gap-2">
-                        <flux:button href="{{ route('admin.templates.edit', $template->id) }}" size="sm" variant="ghost" icon="pencil-square" />
-                        <flux:modal.trigger name="delete-template-{{ $template->id }}">
-                            <flux:button size="sm" variant="ghost" color="danger" icon="trash" />
-                        </flux:modal.trigger>
-                        <x-confirm-delete-modal
-                            name="delete-template-{{ $template->id }}"
-                            :action="route('admin.templates.destroy', $template->id)"
-                            heading="Hapus template ini?"
-                            :text="'Template \''.$template->name.'\' akan dihapus permanen.'"
-                        />
-                    </div>
+                <flux:table.cell align="center">
+                    <flux:dropdown align="end">
+                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                        <flux:menu>
+                            <flux:menu.item icon="pencil-square" href="{{ route('admin.templates.edit', $template->id) }}">
+                                Edit Template
+                            </flux:menu.item>
+                            <flux:menu.separator />
+                            <form action="{{ route('admin.templates.destroy', $template->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus template ini?');" class="w-full">
+                                @csrf
+                                @method('DELETE')
+                                <flux:menu.item type="submit" icon="trash" variant="danger">
+                                    Hapus Template
+                                </flux:menu.item>
+                            </form>
+                        </flux:menu>
+                    </flux:dropdown>
                 </flux:table.cell>
             </flux:table.row>
             @endforeach

@@ -32,8 +32,8 @@ class PackageService
             $data['features'] = [];
         }
 
-        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
-        $data['enable_bgm'] = isset($data['enable_bgm']) ? true : false;
+        $data['is_active'] = (bool) ($data['is_active'] ?? false);
+        $data['enable_bgm'] = (bool) ($data['enable_bgm'] ?? false);
 
         return $this->packageRepository->create($data);
     }
@@ -48,8 +48,8 @@ class PackageService
             $data['features'] = [];
         }
 
-        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
-        $data['enable_bgm'] = isset($data['enable_bgm']) ? true : false;
+        $data['is_active'] = (bool) ($data['is_active'] ?? false);
+        $data['enable_bgm'] = (bool) ($data['enable_bgm'] ?? false);
 
         return $this->packageRepository->update($id, $data);
     }

@@ -29,6 +29,7 @@ class Package extends Model
         return [
             'features' => 'array',
             'is_active' => 'boolean',
+            'enable_bgm' => 'boolean',
         ];
     }
 
