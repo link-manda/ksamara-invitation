@@ -30,7 +30,10 @@
         <flux:spacer />
 
         <flux:navlist variant="outline">
-            <flux:navlist.item icon="cog-6-tooth" href="#">Pengaturan</flux:navlist.item>
+            <div class="px-2 py-1 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 mb-2 pb-2">
+                <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Mode Tema</span>
+                <x-theme-toggle variant="menu" />
+            </div>
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <flux:navlist.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full text-left">
@@ -40,10 +43,12 @@
         </flux:navlist>
     </flux:sidebar>
 
-    <flux:header class="lg:hidden">
+    <flux:header class="lg:hidden flex items-center justify-between">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-3" inset="left" />
         <flux:spacer />
+        <x-theme-toggle />
     </flux:header>
+
 
     <flux:main container>
         @yield('content')

@@ -18,10 +18,11 @@
 
         <flux:spacer />
 
-        <flux:navbar class="max-lg:hidden">
+        <flux:navbar class="max-lg:hidden flex items-center gap-2">
             <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
             <flux:navbar.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navbar.item>
             <flux:navbar.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navbar.item>
+            <x-theme-toggle variant="menu" />
             <form method="POST" action="{{ route('logout') }}" class="inline-block">
                 @csrf
                 <flux:navbar.item as="button" type="submit">
@@ -46,6 +47,10 @@
             <flux:navlist.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
             <flux:navlist.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navlist.item>
             <flux:navlist.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navlist.item>
+            <div class="px-2 py-1 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 my-2 pb-2">
+                <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Mode Tema</span>
+                <x-theme-toggle variant="menu" />
+            </div>
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <flux:navlist.item as="button" type="submit" class="w-full text-left">
@@ -54,6 +59,7 @@
             </form>
         </flux:navlist>
     </flux:sidebar>
+
 
     <flux:main container>
         @yield('content')
