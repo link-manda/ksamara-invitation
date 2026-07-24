@@ -1,9 +1,8 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\URL;
+use App\Notifications\SendEmailOtpNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
@@ -18,55 +17,37 @@ test('email verification screen can be rendered', function () {
     $response->assertOk();
 });
 
-test('email can be verified', function () {
+test('email can be verified with valid 6-digit OTP', function () {
     $user = User::factory()->unverified()->create();
+    $otp = $user->generateOtp();
 
-    Event::fake();
-
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
-
-    $response = $this->actingAs($user)->get($verificationUrl);
-
-    Event::assertDispatched(Verified::class);
+    $response = $this->actingAs($user)->post(route('verification.otp.store'), [
+        'otp' => $otp,
+    ]);
 
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+    $response->assertRedirect('/dashboard');
 });
 
-test('email is not verified with invalid hash', function () {
+test('email is not verified with invalid 6-digit OTP', function () {
     $user = User::factory()->unverified()->create();
+    $user->generateOtp();
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')],
-    );
+    $response = $this->actingAs($user)->post(route('verification.otp.store'), [
+        'otp' => '000000',
+    ]);
 
-    $this->actingAs($user)->get($verificationUrl);
-
+    $response->assertSessionHasErrors('otp');
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 
-test('already verified user visiting verification link is redirected without firing event again', function () {
-    $user = User::factory()->create([
-        'email_verified_at' => now(),
-    ]);
+test('resend email OTP notification generates new OTP and sends notification', function () {
+    Notification::fake();
 
-    Event::fake();
+    $user = User::factory()->unverified()->create();
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
+    $response = $this->actingAs($user)->post(route('verification.send'));
 
-    $this->actingAs($user)->get($verificationUrl)
-        ->assertRedirect(route('dashboard', absolute: false).'?verified=1');
-
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    Event::assertNotDispatched(Verified::class);
+    Notification::assertSentTo($user, SendEmailOtpNotification::class);
+    $response->assertSessionHas('status', 'verification-link-sent');
 });

@@ -1,27 +1,72 @@
-<x-layouts::auth :title="__('Email verification')">
-    <div class="mt-4 flex flex-col gap-6">
-        <flux:text class="text-center">
-            {{ __('Please verify your email address by clicking on the link we just emailed to you.') }}
-        </flux:text>
+<x-layouts::auth :title="__('Verifikasi Email OTP')">
+    <div class="flex flex-col gap-6 text-center">
+        <div class="flex flex-col items-center gap-2">
+            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs mb-1">
+                <flux:icon icon="shield-check" class="size-8" />
+            </div>
+            
+            <flux:heading size="xl" level="1" class="font-bold tracking-tight">
+                {{ __('Verifikasi Alamat Email') }}
+            </flux:heading>
+            
+            <flux:subheading class="max-w-xs mx-auto text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+                Kode 6-digit OTP telah dikirimkan ke email <br>
+                <strong class="text-zinc-900 dark:text-white font-semibold underline decoration-amber-500/40">{{ auth()->user()->email }}</strong>
+            </flux:subheading>
+        </div>
 
         @if (session('status') == 'verification-link-sent')
-            <flux:text class="text-center font-medium !dark:text-green-400 !text-green-600">
-                {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-            </flux:text>
+            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs text-center font-medium animate-pulse">
+                ✨ Kode OTP baru telah berhasil dikirimkan ke email Anda.
+            </div>
         @endif
 
-        <div class="flex flex-col items-center justify-between space-y-3">
-            <form method="POST" action="{{ route('verification.send') }}">
+        <form method="POST" action="{{ route('verification.otp.store') }}" class="flex flex-col gap-6 items-center w-full">
+            @csrf
+
+            <flux:field class="w-full flex flex-col items-center">
+                <flux:otp length="6" name="otp" autofocus placeholder="•" class="justify-center" />
+                <flux:error name="otp" class="mt-2 text-center text-xs" />
+            </flux:field>
+
+            <flux:button type="submit" variant="primary" icon="check" class="w-full shadow-xs">
+                Verifikasi OTP Sekarang
+            </flux:button>
+        </form>
+
+        <div class="flex flex-col items-center justify-between space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800/80" x-data="{
+            seconds: 60,
+            canResend: false,
+            init() {
+                let timer = setInterval(() => {
+                    if (this.seconds > 0) {
+                        this.seconds--;
+                    } else {
+                        this.canResend = true;
+                        clearInterval(timer);
+                    }
+                }, 1000);
+            }
+        }">
+            <form method="POST" action="{{ route('verification.send') }}" class="w-full text-center">
                 @csrf
-                <flux:button type="submit" variant="primary" class="w-full">
-                    {{ __('Resend verification email') }}
-                </flux:button>
+                <template x-if="!canResend">
+                    <button type="button" disabled class="text-xs text-zinc-400 dark:text-zinc-500 cursor-not-allowed font-medium py-1">
+                        Kirim Ulang Kode OTP (<span x-text="seconds" class="font-mono"></span>s)
+                    </button>
+                </template>
+
+                <template x-if="canResend">
+                    <flux:button type="submit" variant="ghost" class="text-xs text-amber-600 dark:text-amber-400 font-semibold hover:underline">
+                        Kirim Ulang Kode OTP Sekarang
+                    </flux:button>
+                </template>
             </form>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" class="w-full text-center">
                 @csrf
-                <flux:button variant="ghost" type="submit" class="text-sm cursor-pointer" data-test="logout-button">
-                    {{ __('Log out') }}
+                <flux:button variant="ghost" type="submit" class="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300" data-test="logout-button">
+                    Keluar / Sign Out
                 </flux:button>
             </form>
         </div>

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +22,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
+ * @property string|null $otp_code
+ * @property Carbon|null $otp_expires_at
  * @property string $password
  * @property UserRole $role
  * @property string|null $phone_number
@@ -32,9 +34,9 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone_number'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+#[Fillable(['name', 'email', 'password', 'role', 'phone_number', 'otp_code', 'otp_expires_at'])]
+#[Hidden(['password', 'otp_code', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
@@ -52,9 +54,41 @@ class User extends Authenticatable implements PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
         ];
+    }
+
+    public function generateOtp(): string
+    {
+        $otp = (string) random_int(100000, 999999);
+        $this->update([
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(10),
+        ]);
+
+        return $otp;
+    }
+
+    public function isOtpExpired(): bool
+    {
+        return ! $this->otp_expires_at || $this->otp_expires_at->isPast();
+    }
+
+    public function verifyOtp(string $code): bool
+    {
+        if ($this->isOtpExpired() || $this->otp_code !== $code) {
+            return false;
+        }
+
+        $this->forceFill([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ])->save();
+
+        return true;
     }
 
     public function orders(): HasMany

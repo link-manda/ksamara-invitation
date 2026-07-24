@@ -1,7 +1,25 @@
 @extends('layouts.customer')
 
 @section('content')
+    @if (session('status') === 'email-verified')
+        <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                    <flux:icon icon="check-circle" class="size-6" />
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold">Verifikasi Email Berhasil! 🎉</h4>
+                    <p class="text-xs text-emerald-600/90 dark:text-emerald-400/90 mt-0.5">Selamat datang di Samara Invitation. Alamat email Anda telah terverifikasi resmi dan akun siap digunakan sepenuhnya.</p>
+                </div>
+            </div>
+            <button @click="show = false" type="button" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200 p-1.5 rounded-lg hover:bg-emerald-500/10">
+                <flux:icon icon="x-mark" class="size-4" />
+            </button>
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-6">
+
         <div>
             <flux:heading size="xl" level="1">{{ __('Dashboard Saya') }}</flux:heading>
             <flux:subheading>Kelola undangan pernikahan digital dan kelola daftar tamu Anda.</flux:subheading>

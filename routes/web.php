@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\VerifyOtpController;
 use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\InvitationController;
 use App\Http\Controllers\Customer\OrderController;
@@ -10,7 +11,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::middleware('auth')->group(function () {
+    Route::post('/email/verify-otp', [VerifyOtpController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.otp.store');
+
+    Route::post('/email/verification-notification', [VerifyOtpController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+});
+
 Route::middleware(['auth', 'verified', 'customer'])->group(function () {
+
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('invitations/create', [InvitationController::class, 'create'])->name('customer.invitations.create');
