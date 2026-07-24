@@ -25,8 +25,8 @@ class PublicInvitationController extends Controller
             abort(404, 'Undangan tidak ditemukan.');
         }
 
-        if ($invitation->status === InvitationStatus::Draft) {
-            abort(403, 'Undangan ini belum dipublikasikan oleh pemilik acara.');
+        if ($invitation->status !== InvitationStatus::Published) {
+            abort(403, 'Undangan ini belum dipublikasikan atau sedang tidak aktif.');
         }
 
         $ogTitle = $invitation->title.' - Undangan Pernikahan';
@@ -42,6 +42,10 @@ class PublicInvitationController extends Controller
 
         if (! $invitation) {
             abort(404, 'Undangan tidak ditemukan.');
+        }
+
+        if ($invitation->status !== InvitationStatus::Published) {
+            abort(403, 'Undangan ini tidak menerima RSVP karena sedang tidak aktif.');
         }
 
         $validated = $request->validate([
