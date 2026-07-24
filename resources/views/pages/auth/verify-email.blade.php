@@ -24,10 +24,7 @@
         <form method="POST" action="{{ route('verification.otp.store') }}" class="flex flex-col gap-6 items-center w-full">
             @csrf
 
-            <flux:field class="w-full flex flex-col items-center">
-                <flux:otp length="6" name="otp" autofocus placeholder="•" class="justify-center" />
-                <flux:error name="otp" class="mt-2 text-center text-xs" />
-            </flux:field>
+            <flux:otp name="otp" length="6" label="Kode OTP" label:sr-only :error:icon="false" error:class="text-center" class="mx-auto" autofocus />
 
             <flux:button type="submit" variant="primary" icon="check" class="w-full shadow-xs">
                 Verifikasi OTP Sekarang
@@ -38,17 +35,46 @@
             seconds: 60,
             canResend: false,
             init() {
-                let timer = setInterval(() => {
-                    if (this.seconds > 0) {
-                        this.seconds--;
+                let isJustResent = {{ session('status') === 'verification-link-sent' ? 'true' : 'false' }};
+                let untilKey = 'otp_resend_until_{{ auth()->id() }}';
+                let now = Date.now();
+                let until = localStorage.getItem(untilKey);
+
+                if (isJustResent || !until) {
+                    until = now + 60000;
+                    localStorage.setItem(untilKey, until);
+                }
+
+                let updateTimer = () => {
+                    let currentNow = Date.now();
+                    let targetUntil = parseInt(localStorage.getItem(untilKey) || 0);
+                    let diff = Math.ceil((targetUntil - currentNow) / 1000);
+
+                    if (diff > 0) {
+                        this.seconds = diff;
+                        this.canResend = false;
+                        return true;
                     } else {
+                        this.seconds = 0;
                         this.canResend = true;
-                        clearInterval(timer);
+                        return false;
                     }
-                }, 1000);
+                };
+
+                if (updateTimer()) {
+                    let timer = setInterval(() => {
+                        if (!updateTimer()) {
+                            clearInterval(timer);
+                        }
+                    }, 1000);
+                }
+            },
+            resetTimer() {
+                let untilKey = 'otp_resend_until_{{ auth()->id() }}';
+                localStorage.setItem(untilKey, Date.now() + 60000);
             }
         }">
-            <form method="POST" action="{{ route('verification.send') }}" class="w-full text-center">
+            <form method="POST" action="{{ route('verification.send') }}" @submit="resetTimer()" class="w-full text-center">
                 @csrf
                 <template x-if="!canResend">
                     <button type="button" disabled class="text-xs text-zinc-400 dark:text-zinc-500 cursor-not-allowed font-medium py-1">
