@@ -20,4 +20,9 @@ class GalleryRepository
     {
         return Gallery::where('invitation_id', $invitationId)->count();
     }
+
+    public function delete(Gallery $gallery): bool
+    {
+        return $gallery->delete();
+    }
 }

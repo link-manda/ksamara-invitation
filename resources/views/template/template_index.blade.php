@@ -41,13 +41,20 @@
                                 Edit Template
                             </flux:menu.item>
                             <flux:menu.separator />
-                            <form action="{{ route('admin.templates.destroy', $template->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus template ini?');" class="w-full">
-                                @csrf
-                                @method('DELETE')
-                                <flux:menu.item type="submit" icon="trash" variant="danger">
-                                    Hapus Template
-                                </flux:menu.item>
-                            </form>
+                            <flux:menu.item 
+                                as="button" 
+                                type="button" 
+                                icon="trash" 
+                                variant="danger" 
+                                x-data 
+                                @click="$dispatch('open-delete-modal', { 
+                                    action: '{{ route('admin.templates.destroy', $template->id) }}', 
+                                    title: 'Hapus Template', 
+                                    message: 'Apakah Anda yakin ingin menghapus template {{ $template->name }}?' 
+                                })"
+                            >
+                                Hapus Template
+                            </flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>
                 </flux:table.cell>

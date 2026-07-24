@@ -17,6 +17,9 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Route::post('invitations', [InvitationController::class, 'store'])->name('customer.invitations.store');
     Route::get('invitations/{id}/edit', [InvitationController::class, 'edit'])->name('customer.invitations.edit');
     Route::put('invitations/{id}', [InvitationController::class, 'update'])->name('customer.invitations.update');
+    Route::delete('invitations/{invitation}/galleries/{gallery}', [InvitationController::class, 'destroyGallery'])
+        ->scopeBindings()
+        ->name('customer.invitations.galleries.destroy');
     Route::patch('invitations/{id}/toggle-status', [InvitationController::class, 'toggleStatus'])->name('customer.invitations.toggle-status');
     Route::delete('invitations/{id}', [InvitationController::class, 'destroy'])->name('customer.invitations.destroy');
     Route::get('invitations/{id}/rsvps', [RsvpController::class, 'index'])->name('customer.invitations.rsvps.index');

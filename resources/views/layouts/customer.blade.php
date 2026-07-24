@@ -60,6 +60,7 @@
     </flux:main>
 
     <flux:toast position="top right" />
+    <x-confirm-delete-modal />
     @fluxScripts
     <x-flash-messages />
     @stack('script')

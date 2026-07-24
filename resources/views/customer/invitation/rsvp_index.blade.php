@@ -61,13 +61,20 @@
                     <flux:dropdown align="end">
                         <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
                         <flux:menu>
-                            <form action="{{ route('customer.rsvp.destroy', $rsvp->id) }}" method="POST" onsubmit="return confirm('Hapus ucapan/RSVP tamu ini?');" class="w-full">
-                                @csrf
-                                @method('DELETE')
-                                <flux:menu.item type="submit" icon="trash" variant="danger">
-                                    Hapus RSVP
-                                </flux:menu.item>
-                            </form>
+                            <flux:menu.item 
+                                as="button" 
+                                type="button" 
+                                icon="trash" 
+                                variant="danger" 
+                                x-data 
+                                @click="$dispatch('open-delete-modal', { 
+                                    action: '{{ route('customer.rsvp.destroy', $rsvp->id) }}', 
+                                    title: 'Hapus Data RSVP', 
+                                    message: 'Apakah Anda yakin ingin menghapus ucapan/RSVP dari {{ $rsvp->guest_name }}?' 
+                                })"
+                            >
+                                Hapus RSVP
+                            </flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>
                 </flux:table.cell>

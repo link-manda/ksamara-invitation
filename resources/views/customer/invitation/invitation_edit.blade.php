@@ -10,7 +10,7 @@
     @csrf
     @method('PUT')
 
-    <div x-data="{ tab: 'mempelai' }">
+    <div x-data="{ tab: '{{ request()->query('tab') === 'galeri' ? 'galeri' : 'mempelai' }}' }">
         <div class="flex gap-1 border-b border-zinc-200 dark:border-zinc-700 overflow-x-auto">
             @foreach (['mempelai' => 'Data Mempelai', 'acara' => 'Rangkaian Acara', 'galeri' => 'Galeri Foto/Video', 'pengaturan' => 'Pengaturan (BGM & Amplop)'] as $key => $label)
                 <button
@@ -105,8 +105,18 @@
                         <flux:heading size="md" class="mb-3">Galeri Terunggah ({{ $invitation->galleries->count() }} file)</flux:heading>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             @foreach($invitation->galleries as $gallery)
-                                <div class="rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 aspect-square">
-                                    <img src="{{ Storage::url($gallery->file_path) }}" alt="Gallery" class="w-full h-full object-cover">
+                                <div class="relative rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 aspect-square group">
+                                    <img src="{{ Storage::url($gallery->file_path) }}" alt="Foto galeri" class="w-full h-full object-cover">
+                                    <flux:modal.trigger name="delete-gallery-{{ $gallery->id }}">
+                                        <flux:button
+                                            type="button"
+                                            variant="danger"
+                                            size="sm"
+                                            icon="trash"
+                                            class="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity"
+                                            aria-label="Hapus foto galeri"
+                                        />
+                                    </flux:modal.trigger>
                                 </div>
                             @endforeach
                         </div>
@@ -184,4 +194,13 @@
         <flux:button type="submit" variant="primary" icon="check" class="w-full sm:w-auto">Simpan Detail Undangan</flux:button>
     </div>
 </form>
+
+@foreach($invitation->galleries as $gallery)
+    <x-confirm-delete-modal
+        name="delete-gallery-{{ $gallery->id }}"
+        :action="route('customer.invitations.galleries.destroy', [$invitation, $gallery])"
+        heading="Hapus foto galeri?"
+        text="Foto ini akan dihapus permanen dari galeri undangan."
+    />
+@endforeach
 @endsection

@@ -49,6 +49,27 @@ test('flux initializes before the flash message toast listener', function (UserR
     'customer layout' => [UserRole::Customer, 'dashboard'],
 ]);
 
+test('delete modal renders before Flux and uses the supported show event', function (UserRole $role, string $route_name) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $response = $this->actingAs($user)->get(route($route_name));
+
+    $response->assertOk()
+        ->assertSee("\$dispatch('modal-show'", false)
+        ->assertDontSee('Flux.modals.show', false);
+
+    $html = $response->getContent();
+    $modal_position = strpos($html, 'data-modal="confirm-delete-modal"');
+    $flux_script_position = strpos($html, '/flux/flux');
+
+    expect($modal_position)->toBeInt()
+        ->and($flux_script_position)->toBeInt()
+        ->and($modal_position)->toBeLessThan($flux_script_position);
+})->with([
+    'admin layout' => [UserRole::Admin, 'admin.dashboard'],
+    'customer layout' => [UserRole::Customer, 'dashboard'],
+]);
+
 test('customer layout renders success, error, and warning flash messages', function () {
     $customer = User::factory()->create(['role' => UserRole::Customer]);
 

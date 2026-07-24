@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Enums\OrderStatus;
 use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Gallery;
 use App\Models\Invitation;
+use App\Models\Order;
 use App\Services\DigitalEnvelopeService;
 use App\Services\EventService;
 use App\Services\GalleryService;
@@ -32,8 +35,8 @@ class InvitationController extends Controller
             return NotificationHelper::redirectWithError('dashboard', 'Anda hanya dapat membuat maksimal 1 undangan per akun.');
         }
 
-        $latestOrder = \App\Models\Order::where('user_id', $request->user()->id)->latest()->first();
-        if ($latestOrder && $latestOrder->status !== \App\Enums\OrderStatus::Paid) {
+        $latestOrder = Order::where('user_id', $request->user()->id)->latest()->first();
+        if ($latestOrder && $latestOrder->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mulai membuat undangan.');
         }
 
@@ -70,7 +73,7 @@ class InvitationController extends Controller
             abort(403, 'Anda tidak diizinkan mengubah undangan ini.');
         }
 
-        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mulai mengedit undangan.');
         }
 
@@ -85,7 +88,7 @@ class InvitationController extends Controller
             abort(403, 'Anda tidak diizinkan mengubah undangan ini.');
         }
 
-        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk melakukan tindakan ini.');
         }
 
@@ -159,6 +162,29 @@ class InvitationController extends Controller
         }
     }
 
+    public function destroyGallery(Request $request, Invitation $invitation, Gallery $gallery): RedirectResponse
+    {
+        if ($invitation->user_id !== $request->user()->id) {
+            abort(403, 'Anda tidak diizinkan menghapus galeri ini.');
+        }
+
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
+            return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu sebelum menghapus galeri.');
+        }
+
+        try {
+            $this->galleryService->deleteGallery($gallery);
+
+            return redirect()
+                ->route('customer.invitations.edit', ['id' => $invitation->id, 'tab' => 'galeri'])
+                ->with('success', 'Foto galeri berhasil dihapus.');
+        } catch (\Exception $exception) {
+            return redirect()
+                ->route('customer.invitations.edit', ['id' => $invitation->id, 'tab' => 'galeri'])
+                ->with('error', 'Gagal menghapus foto galeri: '.$exception->getMessage());
+        }
+    }
+
     public function toggleStatus(Request $request, int $id): RedirectResponse
     {
         $invitation = Invitation::findOrFail($id);
@@ -167,7 +193,7 @@ class InvitationController extends Controller
             abort(403, 'Anda tidak diizinkan mengubah status undangan ini.');
         }
 
-        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mempublikasikan undangan.');
         }
 
@@ -184,7 +210,7 @@ class InvitationController extends Controller
             abort(403, 'Anda tidak diizinkan menghapus undangan ini.');
         }
 
-        if ($invitation->order && $invitation->order->status !== \App\Enums\OrderStatus::Paid) {
+        if ($invitation->order && $invitation->order->status !== OrderStatus::Paid) {
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu sebelum menghapus undangan.');
         }
 

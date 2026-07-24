@@ -81,13 +81,20 @@
 
                                 <flux:menu.separator />
 
-                                <form action="{{ route('customer.invitations.destroy', $invitation->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data undangan ini? Biaya tidak dapat di-refund.');" class="w-full">
-                                    @csrf
-                                    @method('DELETE')
-                                    <flux:menu.item type="submit" icon="trash" variant="danger">
-                                        Hapus Undangan
-                                    </flux:menu.item>
-                                </form>
+                                <flux:menu.item 
+                                    as="button" 
+                                    type="button" 
+                                    icon="trash" 
+                                    variant="danger" 
+                                    x-data 
+                                    @click="$dispatch('open-delete-modal', { 
+                                        action: '{{ route('customer.invitations.destroy', $invitation->id) }}', 
+                                        title: 'Hapus Data Undangan', 
+                                        message: 'Apakah Anda yakin ingin menghapus data undangan ini? Seluruh file galeri dan data tamu akan dihapus permanen dan biaya tidak dapat di-refund.' 
+                                    })"
+                                >
+                                    Hapus Undangan
+                                </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     </div>

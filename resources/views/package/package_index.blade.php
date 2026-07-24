@@ -40,13 +40,20 @@
                                         Edit Paket
                                     </flux:menu.item>
                                     <flux:menu.separator />
-                                    <form action="{{ route('admin.packages.destroy', $package->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');" class="w-full">
-                                        @csrf
-                                        @method('DELETE')
-                                        <flux:menu.item type="submit" icon="trash" variant="danger">
-                                            Hapus Paket
-                                        </flux:menu.item>
-                                    </form>
+                                    <flux:menu.item 
+                                        as="button" 
+                                        type="button" 
+                                        icon="trash" 
+                                        variant="danger" 
+                                        x-data 
+                                        @click="$dispatch('open-delete-modal', { 
+                                            action: '{{ route('admin.packages.destroy', $package->id) }}', 
+                                            title: 'Hapus Paket Undangan', 
+                                            message: 'Apakah Anda yakin ingin menghapus paket {{ $package->name }}?' 
+                                        })"
+                                    >
+                                        Hapus Paket
+                                    </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
                         </flux:table.cell>

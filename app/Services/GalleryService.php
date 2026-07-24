@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use App\Enums\GalleryType;
+use App\Models\Gallery;
 use App\Models\Invitation;
 use App\Repositories\GalleryRepository;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class GalleryService
 {
@@ -18,7 +22,7 @@ class GalleryService
             $existingCount = $this->repository->countByInvitationId($invitation->id);
             if (($existingCount + count($files)) > $package->max_photos) {
                 $max = $package->max_photos;
-                throw new \Exception('Gagal mengunggah foto. Anda telah mencapai batas maksimal ' . $max . ' foto untuk paket ini.');
+                throw new \Exception('Gagal mengunggah foto. Anda telah mencapai batas maksimal '.$max.' foto untuk paket ini.');
             }
         }
 
@@ -44,5 +48,20 @@ class GalleryService
                 ]);
             }
         }
+    }
+
+    public function deleteGallery(Gallery $gallery): void
+    {
+        DB::transaction(function () use ($gallery): void {
+            if (! $this->repository->delete($gallery)) {
+                throw new RuntimeException('Gagal menghapus data galeri.');
+            }
+
+            $disk = Storage::disk('public');
+
+            if ($disk->exists($gallery->file_path) && ! $disk->delete($gallery->file_path)) {
+                throw new RuntimeException('Gagal menghapus file galeri.');
+            }
+        });
     }
 }
