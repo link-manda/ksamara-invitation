@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Package;
+use App\Models\Template;
 use App\Repositories\InvitationRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\RsvpRepository;
@@ -23,6 +25,9 @@ class DashboardService
             'total_invitations' => $this->invitationRepository->countAll(),
             'total_revenue' => $this->orderRepository->sumPaidAmount(),
             'pending_orders' => $this->orderRepository->countPending(),
+            'recent_orders' => $this->orderRepository->getRecentOrders(5),
+            'total_packages' => Package::where('is_active', true)->count(),
+            'total_templates' => Template::where('is_active', true)->count(),
         ];
     }
 

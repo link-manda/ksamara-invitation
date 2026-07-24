@@ -3,8 +3,8 @@
 @section('content')
     <div class="flex items-center justify-between mb-6">
         <div>
-            <flux:heading size="xl" level="1">{{ __('Dashboard') }}</flux:heading>
-            <flux:subheading>Selamat datang di area customer Samara Invitation.</flux:subheading>
+            <flux:heading size="xl" level="1">{{ __('Dashboard Saya') }}</flux:heading>
+            <flux:subheading>Kelola undangan pernikahan digital dan kelola daftar tamu Anda.</flux:subheading>
         </div>
         @if(!$has_invitation)
             <flux:button href="{{ route('customer.invitations.create') }}" variant="primary" icon="plus">Buat Undangan Baru</flux:button>
@@ -12,63 +12,90 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <flux:card>
-            <flux:heading size="sm" class="text-slate-500 mb-1">Total Undangan Anda</flux:heading>
-            <flux:heading size="2xl">{{ number_format($stats['total_invitations'], 0, ',', '.') }}</flux:heading>
+        <flux:card class="flex items-center justify-between p-6">
+            <div>
+                <flux:heading size="sm" class="text-zinc-500 mb-1">Total Undangan Anda</flux:heading>
+                <flux:heading size="2xl" class="font-bold">{{ number_format($stats['total_invitations'], 0, ',', '.') }}</flux:heading>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <flux:icon icon="envelope" class="size-6" />
+            </div>
         </flux:card>
         
-        <flux:card>
-            <flux:heading size="sm" class="text-slate-500 mb-1">Total Tamu Konfirmasi Hadir</flux:heading>
-            <flux:heading size="2xl" class="text-green-600">{{ number_format($stats['total_guests'], 0, ',', '.') }}</flux:heading>
+        <flux:card class="flex items-center justify-between p-6">
+            <div>
+                <flux:heading size="sm" class="text-zinc-500 mb-1">Tamu Konfirmasi Hadir</flux:heading>
+                <flux:heading size="2xl" class="font-bold text-green-600 dark:text-green-400">{{ number_format($stats['total_guests'], 0, ',', '.') }}</flux:heading>
+            </div>
+            <div class="p-3 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
+                <flux:icon icon="users" class="size-6" />
+            </div>
         </flux:card>
         
-        <flux:card>
-            <flux:heading size="sm" class="text-slate-500 mb-1">Tagihan Belum Dibayar</flux:heading>
-            <flux:heading size="2xl" class="text-red-600">Rp {{ number_format($stats['unpaid_bills'], 0, ',', '.') }}</flux:heading>
+        <flux:card class="flex items-center justify-between p-6">
+            <div>
+                <flux:heading size="sm" class="text-zinc-500 mb-1">Tagihan Belum Dibayar</flux:heading>
+                <flux:heading size="2xl" class="font-bold text-red-600 dark:text-red-400">Rp {{ number_format($stats['unpaid_bills'], 0, ',', '.') }}</flux:heading>
+            </div>
+            <div class="p-3 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400">
+                <flux:icon icon="credit-card" class="size-6" />
+            </div>
         </flux:card>
     </div>
 
+    <div class="mb-4">
+        <flux:heading size="lg" level="2">Daftar Undangan Digital</flux:heading>
+    </div>
+
     @if($invitations->isEmpty())
-        <flux:card class="text-center py-12">
-            <flux:heading size="lg" class="mb-2">Anda belum memiliki undangan.</flux:heading>
-            <flux:subheading class="mb-4">Mulai buat undangan pernikahan digital Anda sekarang.</flux:subheading>
-            <flux:button href="{{ route('customer.invitations.create') }}" variant="primary">Buat Undangan</flux:button>
+        <flux:card class="text-center py-12 border-dashed">
+            <div class="p-4 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 inline-block mb-3">
+                <flux:icon icon="sparkles" class="size-8" />
+            </div>
+            <flux:heading size="lg" class="mb-1">Anda belum memiliki undangan digital.</flux:heading>
+            <flux:subheading class="mb-6 max-w-md mx-auto">Mulai buat undangan pernikahan digital Anda yang elegan hanya dalam beberapa langkah mudah.</flux:subheading>
+            <flux:button href="{{ route('customer.invitations.create') }}" variant="primary" icon="plus">Buat Undangan Baru Sekarang</flux:button>
         </flux:card>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($invitations as $invitation)
-                <flux:card class="flex flex-col gap-4">
-                    <div>
-                        <flux:heading size="lg">{{ $invitation->title }}</flux:heading>
-                        <flux:subheading class="mt-1">
-                            URL: <a href="{{ route('public.invitation.show', $invitation->slug) }}" target="_blank" class="text-amber-600 hover:underline">/{{ $invitation->slug }}</a>
-                        </flux:subheading>
+                <flux:card class="flex flex-col justify-between gap-6 border-zinc-200/80 dark:border-zinc-800 hover:border-amber-500/50 transition-colors">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <flux:heading size="lg" class="font-bold text-zinc-900 dark:text-white leading-snug">{{ $invitation->title }}</flux:heading>
+                            @if($invitation->status === \App\Enums\InvitationStatus::Published)
+                                <flux:badge color="success">Published</flux:badge>
+                            @elseif($invitation->status === \App\Enums\InvitationStatus::Draft)
+                                <flux:badge color="zinc">Draft</flux:badge>
+                            @else
+                                <flux:badge color="danger">Inactive</flux:badge>
+                            @endif
+                        </div>
+
+                        <div class="text-xs text-zinc-500 font-mono flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/80 p-2 rounded-lg border border-zinc-200/60 dark:border-zinc-700/60">
+                            <flux:icon icon="link" class="size-3.5 text-amber-500 shrink-0" />
+                            <a href="{{ route('public.invitation.show', $invitation->slug) }}" target="_blank" class="text-amber-600 dark:text-amber-400 hover:underline truncate">
+                                /{{ $invitation->slug }}
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-slate-500">Status:</span>
-                        @if($invitation->status === \App\Enums\InvitationStatus::Published)
-                            <flux:badge color="success">Published</flux:badge>
-                        @elseif($invitation->status === \App\Enums\InvitationStatus::Draft)
-                            <flux:badge color="zinc">Draft</flux:badge>
-                        @else
-                            <flux:badge color="danger">Inactive</flux:badge>
-                        @endif
-                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800 gap-2">
+                        <div class="flex items-center gap-2">
+                            <flux:button href="{{ route('customer.invitations.edit', $invitation->id) }}" variant="outline" size="sm" icon="pencil-square">
+                                Edit Data
+                            </flux:button>
 
-                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                        <span class="text-xs text-slate-500 font-medium">Aksi</span>
+                            <flux:button href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}" variant="ghost" size="sm" icon="users">
+                                Tamu
+                            </flux:button>
+                        </div>
+
                         <flux:dropdown align="end">
-                            <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
+                            <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi Lainnya" />
                             <flux:menu>
-                                <flux:menu.item icon="pencil-square" href="{{ route('customer.invitations.edit', $invitation->id) }}">
-                                    Edit Data Undangan
-                                </flux:menu.item>
                                 <flux:menu.item icon="arrow-top-right-on-square" href="{{ route('public.invitation.show', $invitation->slug) }}" target="_blank">
                                     Lihat Undangan Live
-                                </flux:menu.item>
-                                <flux:menu.item icon="users" href="{{ route('customer.invitations.rsvps.index', $invitation->id) }}">
-                                    Daftar RSVP & Tamu
                                 </flux:menu.item>
                                 
                                 <form action="{{ route('customer.invitations.toggle-status', $invitation->id) }}" method="POST" class="w-full">

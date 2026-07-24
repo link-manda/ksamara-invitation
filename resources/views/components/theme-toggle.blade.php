@@ -1,29 +1,53 @@
 @props([
-    'variant' => 'button', // 'button' or 'menu'
+    'variant' => 'nav', // 'nav' (sidebar item) or 'icon' (header icon button)
 ])
 
-<div x-data class="inline-flex items-center">
-    @if($variant === 'menu')
-        <flux:dropdown position="bottom" align="end">
-            <flux:button variant="ghost" size="sm" icon="sun" class="dark:hidden" aria-label="Pilih Tema" />
-            <flux:button variant="ghost" size="sm" icon="moon" class="hidden dark:inline-flex" aria-label="Pilih Tema" />
-
-            <flux:menu>
-                <flux:menu.item icon="sun" x-on:click="$flux.appearance = 'light'">Terang (Light)</flux:menu.item>
-                <flux:menu.item icon="moon" x-on:click="$flux.appearance = 'dark'">Gelap (Dark)</flux:menu.item>
-                <flux:menu.item icon="computer-desktop" x-on:click="$flux.appearance = 'system'">Sistem</flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
-    @else
-        <flux:button 
-            variant="ghost" 
-            size="sm" 
-            x-on:click="$flux.appearance = $flux.appearance === 'dark' ? 'light' : 'dark'" 
-            aria-label="Ganti Tema"
-            class="rounded-lg text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+<div x-data="{
+    isDark: document.documentElement.classList.contains('dark'),
+    toggleTheme() {
+        this.isDark = !this.isDark;
+        if (this.isDark) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('flux.appearance', 'dark');
+            if (window.Flux) window.Flux.appearance = 'dark';
+            if (this.$flux) this.$flux.appearance = 'dark';
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('flux.appearance', 'light');
+            if (window.Flux) window.Flux.appearance = 'light';
+            if (this.$flux) this.$flux.appearance = 'light';
+        }
+    }
+}" class="inline-block w-full">
+    @if($variant === 'icon')
+        <button 
+            type="button" 
+            x-on:click="toggleTheme()" 
+            class="p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer flex items-center justify-center"
+            :aria-label="isDark ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'"
         >
-            <flux:icon icon="sun" class="size-5 dark:hidden text-amber-500" />
-            <flux:icon icon="moon" class="size-5 hidden dark:block text-indigo-400" />
-        </flux:button>
+            <span x-show="isDark" class="flex items-center">
+                <flux:icon icon="sun" class="size-5 text-amber-400" />
+            </span>
+            <span x-show="!isDark" class="flex items-center">
+                <flux:icon icon="moon" class="size-5 text-indigo-500" />
+            </span>
+        </button>
+    @else
+        <flux:navlist.item 
+            as="button" 
+            type="button" 
+            x-on:click="toggleTheme()" 
+            class="w-full text-left cursor-pointer"
+        >
+            <span x-show="isDark" class="flex items-center gap-2">
+                <flux:icon icon="sun" class="size-4 text-amber-400" />
+                <span>Mode Terang</span>
+            </span>
+            <span x-show="!isDark" class="flex items-center gap-2">
+                <flux:icon icon="moon" class="size-4 text-indigo-500" />
+                <span>Mode Gelap</span>
+            </span>
+        </flux:navlist.item>
     @endif
 </div>

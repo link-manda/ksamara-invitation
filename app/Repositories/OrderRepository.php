@@ -38,6 +38,11 @@ class OrderRepository
         return Order::with(['user', 'package', 'invitation'])->latest()->get();
     }
 
+    public function getRecentOrders(int $limit = 5): Collection
+    {
+        return Order::with(['user', 'package', 'invitation'])->latest()->take($limit)->get();
+    }
+
     public function sumPaidAmount(): int
     {
         return (int) Order::where('status', OrderStatus::Paid)->sum('amount');
