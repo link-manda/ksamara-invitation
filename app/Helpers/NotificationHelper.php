@@ -30,4 +30,9 @@ class NotificationHelper
     {
         return back()->with('warning', $message)->withInput();
     }
+
+    public static function backWithInfo(string $message): RedirectResponse
+    {
+        return back()->with('info', $message)->withInput();
+    }
 }

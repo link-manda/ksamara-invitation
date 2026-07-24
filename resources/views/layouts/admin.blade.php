@@ -46,12 +46,12 @@
     </flux:header>
 
     <flux:main container>
-        <x-flash-messages />
-
         @yield('content')
     </flux:main>
 
+    <flux:toast position="top right" />
     @fluxScripts
+    <x-flash-messages />
     @stack('script')
 </body>
 </html>

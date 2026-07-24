@@ -12,6 +12,12 @@ class PackageRepository
         return Package::all();
     }
 
+    /** @return Collection<int, Package> */
+    public function getActive(): Collection
+    {
+        return Package::query()->where('is_active', true)->get();
+    }
+
     public function getById(int $id): ?Package
     {
         return Package::findOrFail($id);

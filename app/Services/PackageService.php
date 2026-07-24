@@ -17,6 +17,12 @@ class PackageService
         return $this->packageRepository->getAll();
     }
 
+    /** @return Collection<int, Package> */
+    public function getActivePackages(): Collection
+    {
+        return $this->packageRepository->getActive();
+    }
+
     public function getPackageById(int $id): ?Package
     {
         return $this->packageRepository->getById($id);

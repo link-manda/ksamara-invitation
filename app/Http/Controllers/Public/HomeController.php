@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\PackageRepository;
+use App\Services\PackageService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __construct(private readonly PackageRepository $packageRepository) {}
+    public function __construct(private readonly PackageService $packageService) {}
 
     public function index(): View
     {
-        $packages = $this->packageRepository->getAll();
+        $packages = $this->packageService->getActivePackages();
 
         return view('welcome', compact('packages'));
     }

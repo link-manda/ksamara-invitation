@@ -25,6 +25,30 @@ test('admin layout renders success, error, and warning flash messages', function
         ->assertSee('Perhatian, data belum lengkap.');
 });
 
+test('flux initializes before the flash message toast listener', function (UserRole $role, string $route_name) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $response = $this->actingAs($user)
+        ->withSession(['success' => 'Berhasil disimpan.'])
+        ->get(route($route_name));
+
+    $response->assertOk()
+        ->assertSee("addEventListener('alpine:initialized'", false)
+        ->assertDontSee("addEventListener('alpine:init'", false)
+        ->assertDontSee("addEventListener('DOMContentLoaded'", false);
+
+    $html = $response->getContent();
+    $flux_script_position = strpos($html, '/flux/flux');
+    $toast_listener_position = strpos($html, "addEventListener('alpine:initialized'");
+
+    expect($flux_script_position)->toBeInt()
+        ->and($toast_listener_position)->toBeInt()
+        ->and($flux_script_position)->toBeLessThan($toast_listener_position);
+})->with([
+    'admin layout' => [UserRole::Admin, 'admin.dashboard'],
+    'customer layout' => [UserRole::Customer, 'dashboard'],
+]);
+
 test('customer layout renders success, error, and warning flash messages', function () {
     $customer = User::factory()->create(['role' => UserRole::Customer]);
 

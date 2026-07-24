@@ -22,6 +22,18 @@ test('admin can view package list', function () {
         ->assertOk();
 });
 
+test('admin can view inactive packages', function () {
+    $package = Package::factory()->create([
+        'name' => 'Paket Nonaktif',
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get(route('admin.packages.index'))
+        ->assertOk()
+        ->assertSee($package->name);
+});
+
 test('admin can create a package', function () {
     $response = $this->actingAs($this->admin)->post(route('admin.packages.store'), [
         'name' => 'Gold',
