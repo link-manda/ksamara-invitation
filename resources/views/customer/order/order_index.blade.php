@@ -9,6 +9,9 @@
 @php
     $totalPaid = $orders->where('status', \App\Enums\OrderStatus::Paid)->sum('amount');
     $totalPending = $orders->where('status', \App\Enums\OrderStatus::Pending)->sum('amount');
+    $csPhone = $settings['whatsapp_cs'] ?? '6281234567890';
+    $qrisUrl = !empty($settings['qris_image_path']) ? Storage::url($settings['qris_image_path']) : 'https://placehold.co/300x300?text=QRIS+Samara+Invitation';
+    $bankInfo = $settings['bank_transfer_info'] ?? null;
 @endphp
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -83,14 +86,14 @@
 
                         @php
                             $waMessage = urlencode("Halo Admin Samara, saya ingin menanyakan pesanan #ORD-".str_pad($order->id, 5, '0', STR_PAD_LEFT));
-                            $waLink = "https://wa.me/6281234567890?text=" . $waMessage;
+                            $waLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', $csPhone) . "?text=" . $waMessage;
                         @endphp
                         <flux:button href="{{ $waLink }}" target="_blank" variant="ghost" size="sm" icon="chat-bubble-left-right">
                             CS
                         </flux:button>
                     </div>
                 </flux:table.cell>
-            </flux:row>
+            </flux:table.row>
             @empty
             <flux:table.row>
                 <flux:table.cell colspan="6" class="text-center py-10 text-zinc-500">
@@ -110,29 +113,40 @@
     <flux:modal name="payment-modal-{{ $order->id }}" class="max-w-md text-center">
         <div class="space-y-4">
             <div>
-                <flux:heading size="lg">Pembayaran QRIS</flux:heading>
+                <flux:heading size="lg">Pembayaran QRIS & Transfer</flux:heading>
                 <flux:subheading class="mt-1">
                     Tagihan #ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }} senilai <strong class="text-amber-600 dark:text-amber-400">Rp {{ number_format($order->amount, 0, ',', '.') }}</strong>
                 </flux:subheading>
             </div>
             
             <div class="bg-white p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-xs inline-block">
-                <img src="https://placehold.co/300x300?text=QRIS+Samara+Invitation" alt="QRIS" class="w-56 h-56 rounded-lg mx-auto object-cover">
+                <img src="{{ $qrisUrl }}" alt="QRIS Samara Invitation" class="w-56 h-56 rounded-lg mx-auto object-cover">
             </div>
 
-            <flux:text class="text-xs text-zinc-500">
+            <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">
                 Pindai kode QRIS menggunakan e-wallet (GoPay, OVO, Dana, ShopeePay) atau Mobile Banking (BCA, Mandiri, BRI, BNI).
             </flux:text>
 
+            @if($bankInfo)
+                <div class="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/80 text-left text-xs space-y-1">
+                    <div class="font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 mb-1">
+                        <flux:icon icon="building-library" class="size-4 text-amber-500" />
+                        <span>Alternatif Transfer Bank:</span>
+                    </div>
+                    <div class="font-mono whitespace-pre-line text-zinc-700 dark:text-zinc-300">{{ $bankInfo }}</div>
+                </div>
+            @endif
+
             @php
                 $waMessage = urlencode("Halo Admin Samara, saya ingin mengonfirmasi pembayaran untuk pesanan #ORD-".str_pad($order->id, 5, '0', STR_PAD_LEFT)." senilai Rp ".number_format($order->amount, 0, ',', '.').". Berikut adalah bukti transfer saya:");
-                $waLink = "https://wa.me/6281234567890?text=" . $waMessage;
+                $waLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', $csPhone) . "?text=" . $waMessage;
             @endphp
 
             <div class="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                <flux:button href="{{ $waLink }}" target="_blank" variant="primary" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white border-transparent" icon="chat-bubble-left-ellipsis">
-                    Konfirmasi Pembayaran via WA
-                </flux:button>
+                <a href="{{ $waLink }}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors text-xs">
+                    <flux:icon icon="chat-bubble-left-ellipsis" class="size-4 text-white shrink-0" />
+                    <span>Konfirmasi Pembayaran via WA</span>
+                </a>
                 <flux:modal.close>
                     <flux:button variant="outline" class="w-full">Tutup</flux:button>
                 </flux:modal.close>

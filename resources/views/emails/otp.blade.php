@@ -20,7 +20,7 @@
         <tr>
             <td style="padding: 32px 28px;">
                 <h2 style="font-size: 18px; font-weight: 700; color: #09090b; margin-top: 0; margin-bottom: 16px;">
-                    Halo, {{ $name }}! 👋
+                    Halo, {{ $name }}!
                 </h2>
 
                 <p style="font-size: 14px; line-height: 1.6; color: #3f3f46; margin-bottom: 20px;">
@@ -42,7 +42,7 @@
 
                 <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 6px; margin-bottom: 24px;">
                     <p style="font-size: 12px; color: #92400e; margin: 0; line-height: 1.5;">
-                        ⚠️ <strong>Catatan Keamanan:</strong> Kode OTP ini hanya berlaku selama <strong>10 menit</strong>. Mohon jaga kerahasiaan kode ini dan jangan berikan kepada pihak mana pun.
+                        <strong>Catatan Keamanan:</strong> Kode OTP ini hanya berlaku selama <strong>10 menit</strong>. Mohon jaga kerahasiaan kode ini dan jangan berikan kepada pihak mana pun.
                     </p>
                 </div>
 

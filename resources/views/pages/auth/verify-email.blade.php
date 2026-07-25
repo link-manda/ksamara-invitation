@@ -1,5 +1,103 @@
 <x-layouts::auth :title="__('Verifikasi Email OTP')">
-    <div class="flex flex-col gap-6 text-center">
+    <div class="flex flex-col gap-6 text-center" x-data="{
+        isSubmitting: false,
+        errorMessage: null,
+        showSuccessModal: false,
+        countdown: 3,
+        redirectUrl: '',
+        seconds: 60,
+        canResend: false,
+
+        init() {
+            let isJustResent = {{ session('status') === 'verification-link-sent' ? 'true' : 'false' }};
+            let untilKey = 'otp_resend_until_{{ auth()->id() }}';
+            let now = Date.now();
+            let until = localStorage.getItem(untilKey);
+
+            if (isJustResent || !until) {
+                until = now + 60000;
+                localStorage.setItem(untilKey, until);
+            }
+
+            let updateTimer = () => {
+                let currentNow = Date.now();
+                let targetUntil = parseInt(localStorage.getItem(untilKey) || 0);
+                let diff = Math.ceil((targetUntil - currentNow) / 1000);
+
+                if (diff > 0) {
+                    this.seconds = diff;
+                    this.canResend = false;
+                    return true;
+                } else {
+                    this.seconds = 0;
+                    this.canResend = true;
+                    return false;
+                }
+            };
+
+            if (updateTimer()) {
+                let timer = setInterval(() => {
+                    if (!updateTimer()) {
+                        clearInterval(timer);
+                    }
+                }, 1000);
+            }
+        },
+
+        resetTimer() {
+            let untilKey = 'otp_resend_until_{{ auth()->id() }}';
+            localStorage.setItem(untilKey, Date.now() + 60000);
+        },
+
+        async submitOtp(e) {
+            this.isSubmitting = true;
+            this.errorMessage = null;
+            let formData = new FormData(e.target);
+
+            try {
+                let res = await fetch('{{ route('verification.otp.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+
+                let data = await res.json();
+
+                if (res.ok && data.success) {
+                    this.redirectUrl = data.redirect_url;
+                    this.showSuccessModal = true;
+                    this.countdown = 3;
+                    
+                    let interval = setInterval(() => {
+                        if (this.countdown > 1) {
+                            this.countdown--;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 1000);
+
+                    setTimeout(() => {
+                        window.location.href = this.redirectUrl;
+                    }, 3000);
+                } else {
+                    this.isSubmitting = false;
+                    if (data.errors && data.errors.otp) {
+                        this.errorMessage = data.errors.otp[0];
+                    } else if (data.message) {
+                        this.errorMessage = data.message;
+                    } else {
+                        this.errorMessage = 'Kode OTP yang Anda masukkan salah atau telah kadaluwarsa.';
+                    }
+                }
+            } catch (err) {
+                this.isSubmitting = false;
+                this.errorMessage = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+            }
+        }
+    }">
         <div class="flex flex-col items-center gap-2">
             <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs mb-1">
                 <flux:icon icon="shield-check" class="size-8" />
@@ -16,64 +114,33 @@
         </div>
 
         @if (session('status') == 'verification-link-sent')
-            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs text-center font-medium animate-pulse">
-                ✨ Kode OTP baru telah berhasil dikirimkan ke email Anda.
+            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs text-center font-medium flex items-center justify-center gap-2">
+                <flux:icon icon="sparkles" class="size-4 shrink-0 text-emerald-500" />
+                <span>Kode OTP baru telah berhasil dikirimkan ke email Anda.</span>
             </div>
         @endif
 
-        <form method="POST" action="{{ route('verification.otp.store') }}" class="flex flex-col gap-6 items-center w-full">
+        <form @submit.prevent="submitOtp($event)" method="POST" action="{{ route('verification.otp.store') }}" class="flex flex-col gap-6 items-center w-full">
             @csrf
 
-            <flux:otp name="otp" length="6" label="Kode OTP" label:sr-only :error:icon="false" error:class="text-center" class="mx-auto" autofocus />
+            <flux:field class="w-full flex flex-col items-center">
+                <flux:otp name="otp" length="6" label="Kode OTP" label:sr-only :error:icon="false" error:class="text-center" class="mx-auto" autofocus />
+                
+                <template x-if="errorMessage">
+                    <p class="mt-2 text-center text-xs text-red-600 dark:text-red-400 font-medium" x-text="errorMessage"></p>
+                </template>
+                @error('otp')
+                    <p class="mt-2 text-center text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>
+                @enderror
+            </flux:field>
 
-            <flux:button type="submit" variant="primary" icon="check" class="w-full shadow-xs">
-                Verifikasi OTP Sekarang
+            <flux:button type="submit" variant="primary" icon="check" class="w-full shadow-xs" x-bind:disabled="isSubmitting">
+                <span x-show="!isSubmitting">Verifikasi OTP Sekarang</span>
+                <span x-show="isSubmitting">Memproses Verifikasi...</span>
             </flux:button>
         </form>
 
-        <div class="flex flex-col items-center justify-between space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800/80" x-data="{
-            seconds: 60,
-            canResend: false,
-            init() {
-                let isJustResent = {{ session('status') === 'verification-link-sent' ? 'true' : 'false' }};
-                let untilKey = 'otp_resend_until_{{ auth()->id() }}';
-                let now = Date.now();
-                let until = localStorage.getItem(untilKey);
-
-                if (isJustResent || !until) {
-                    until = now + 60000;
-                    localStorage.setItem(untilKey, until);
-                }
-
-                let updateTimer = () => {
-                    let currentNow = Date.now();
-                    let targetUntil = parseInt(localStorage.getItem(untilKey) || 0);
-                    let diff = Math.ceil((targetUntil - currentNow) / 1000);
-
-                    if (diff > 0) {
-                        this.seconds = diff;
-                        this.canResend = false;
-                        return true;
-                    } else {
-                        this.seconds = 0;
-                        this.canResend = true;
-                        return false;
-                    }
-                };
-
-                if (updateTimer()) {
-                    let timer = setInterval(() => {
-                        if (!updateTimer()) {
-                            clearInterval(timer);
-                        }
-                    }, 1000);
-                }
-            },
-            resetTimer() {
-                let untilKey = 'otp_resend_until_{{ auth()->id() }}';
-                localStorage.setItem(untilKey, Date.now() + 60000);
-            }
-        }">
+        <div class="flex flex-col items-center justify-between space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
             <form method="POST" action="{{ route('verification.send') }}" @submit="resetTimer()" class="w-full text-center">
                 @csrf
                 <template x-if="!canResend">
@@ -96,5 +163,55 @@
                 </flux:button>
             </form>
         </div>
+
+        <!-- Success Modal Popup -->
+        <template x-teleport="body">
+            <div x-show="showSuccessModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/75 backdrop-blur-md" 
+                 style="display: none;">
+                
+                <div x-show="showSuccessModal"
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     class="w-full max-w-sm p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl text-center space-y-5 relative overflow-hidden">
+                    
+                    <!-- Ambient Glow Effect -->
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32 bg-emerald-500/20 blur-2xl rounded-full pointer-events-none"></div>
+
+                    <!-- Animated Checkmark Badge -->
+                    <div class="relative mx-auto flex items-center justify-center size-16 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-inner">
+                        <flux:icon icon="check-circle" class="size-10 text-emerald-500 animate-bounce" />
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
+                            Verifikasi Email Berhasil
+                        </h3>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Selamat datang di <strong>Samara Invitation</strong>. Akun Anda telah aktif dan terverifikasi sepenuhnya.
+                        </p>
+                    </div>
+
+                    <!-- Countdown & Redirect Badge -->
+                    <div class="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 flex items-center justify-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">
+                        <flux:icon icon="arrow-right" class="size-4 text-emerald-500 animate-pulse" />
+                        <span>Mengarahkan ke dashboard dalam <strong class="font-mono text-emerald-600 dark:text-emerald-400 font-bold" x-text="countdown">3</strong> detik...</span>
+                    </div>
+
+                    <!-- Animated Progress Line -->
+                    <div class="w-full bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full transition-all duration-1000 ease-linear rounded-full" 
+                             :style="'width: ' + (countdown / 3 * 100) + '%'"></div>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 </x-layouts::auth>

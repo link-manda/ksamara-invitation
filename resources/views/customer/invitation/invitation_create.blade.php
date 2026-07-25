@@ -97,11 +97,13 @@
                 </div>
 
                 <flux:text class="text-xs space-y-2 leading-relaxed text-zinc-600 dark:text-zinc-400">
-                    <p>
-                        💡 <strong>Langkah Selanjutnya:</strong> Setelah membuat undangan, Anda dapat melengkapi informasi resepsi, galeri foto, musik latar, serta amplop digital di halaman edit undangan.
+                    <p class="flex items-start gap-1.5">
+                        <flux:icon icon="light-bulb" class="size-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span><strong>Langkah Selanjutnya:</strong> Setelah membuat undangan, Anda dapat melengkapi informasi resepsi, galeri foto, musik latar, serta amplop digital di halaman edit undangan.</span>
                     </p>
-                    <p>
-                        💳 Pesanan akan otomatis dibuat dalam status <em>Pending</em> dan dapat dilunasi kapan saja melalui menu <strong>Pesanan Saya</strong>.
+                    <p class="flex items-start gap-1.5">
+                        <flux:icon icon="credit-card" class="size-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span>Pesanan akan otomatis dibuat dalam status <em>Pending</em> dan dapat dilunasi kapan saja melalui menu <strong>Pesanan Saya</strong>.</span>
                     </p>
                 </flux:text>
             </div>

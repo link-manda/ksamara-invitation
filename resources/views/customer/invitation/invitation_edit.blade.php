@@ -184,7 +184,7 @@
                                     <div class="mt-3 flex items-start gap-4">
                                         @if(isset($envelope->qr_code_path))
                                             <div x-show="!preview" class="flex flex-col gap-2">
-                                                <span class="text-sm text-green-600 dark:text-green-400 font-medium">✓ QRIS Tersimpan:</span>
+                                                <span class="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5"><flux:icon icon="check-circle" class="size-4 text-emerald-500" /> QRIS Tersimpan:</span>
                                                 <img src="{{ Storage::url($envelope->qr_code_path) }}" class="h-20 w-20 object-cover rounded-lg border border-zinc-200 dark:border-zinc-700">
                                             </div>
                                         @endif

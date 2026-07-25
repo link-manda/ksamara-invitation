@@ -20,7 +20,7 @@ class SendEmailOtpNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('🔐 Kode OTP Verifikasi: '.$this->otpCode.' - Samara Invitation')
+            ->subject('Kode OTP Verifikasi: '.$this->otpCode.' - Samara Invitation')
             ->view('emails.otp', [
                 'name' => $notifiable->name,
                 'otpCode' => $this->otpCode,

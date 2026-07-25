@@ -8,7 +8,7 @@
                     <flux:icon icon="check-circle" class="size-6" />
                 </div>
                 <div>
-                    <h4 class="text-sm font-bold">Verifikasi Email Berhasil! 🎉</h4>
+                    <h4 class="text-sm font-bold">Verifikasi Email Berhasil</h4>
                     <p class="text-xs text-emerald-600/90 dark:text-emerald-400/90 mt-0.5">Selamat datang di Samara Invitation. Alamat email Anda telah terverifikasi resmi dan akun siap digunakan sepenuhnya.</p>
                 </div>
             </div>
