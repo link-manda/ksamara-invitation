@@ -128,17 +128,41 @@ class InvitationController extends Controller
 
             'music_path' => 'nullable|string',
         ], [
-            'events.*.name.required' => 'Terdapat acara yang belum memiliki Nama Acara.',
-            'events.*.start_time.required' => 'Terdapat acara yang belum memiliki Waktu Mulai.',
-            'events.*.location_name.required' => 'Terdapat acara yang belum memiliki Nama Lokasi.',
-            'events.*.location_address.required' => 'Terdapat acara yang belum memiliki Alamat.',
+            'title.required' => 'Judul Undangan wajib diisi.',
+            'groom_name.required' => 'Nama Mempelai Pria wajib diisi.',
+            'bride_name.required' => 'Nama Mempelai Wanita wajib diisi.',
+
+            'events.*.name.required' => 'Nama Acara wajib diisi.',
+            'events.*.start_time.required' => 'Waktu Mulai Acara wajib diisi.',
+            'events.*.start_time.date' => 'Waktu Mulai Acara harus berupa tanggal dan jam yang valid.',
+            'events.*.end_time.date' => 'Waktu Selesai Acara harus berupa tanggal dan jam yang valid.',
+            'events.*.end_time.after_or_equal' => 'Waktu Selesai Acara harus sama dengan atau setelah Waktu Mulai.',
+            'events.*.location_name.required' => 'Nama Tempat/Gedung wajib diisi.',
+            'events.*.location_address.required' => 'Alamat Lengkap Acara wajib diisi.',
+            'events.*.google_maps_link.url' => 'Format Link Google Maps tidak valid (harus diawali http:// atau https://).',
+
             'galleries.*.max' => 'Ukuran salah satu foto galeri melebihi batas 2MB.',
-            'galleries.*.uploaded' => 'Gagal mengunggah foto. Pastikan ukuran file kurang dari 2MB (batas server).',
+            'galleries.*.uploaded' => 'Gagal mengunggah foto. Pastikan ukuran file kurang dari 2MB.',
             'galleries.*.image' => 'File galeri harus berupa gambar.',
-            'envelopes.*.bank_name.required' => 'Terdapat amplop digital yang belum memiliki Nama Bank.',
-            'envelopes.*.account_name.required' => 'Terdapat amplop digital yang belum memiliki Atas Nama.',
+            'galleries.*.mimes' => 'Format foto galeri harus berupa jpeg, png, jpg, atau webp.',
+
+            'envelopes.*.bank_name.required' => 'Nama Bank / E-Wallet wajib diisi.',
+            'envelopes.*.account_name.required' => 'Atas Nama Rekening wajib diisi.',
             'envelopes.*.qr_code_file.max' => 'Ukuran file QRIS melebihi batas 2MB.',
-            'envelopes.*.qr_code_file.uploaded' => 'Gagal mengunggah QRIS. Pastikan file kurang dari 2MB (batas server).',
+            'envelopes.*.qr_code_file.uploaded' => 'Gagal mengunggah QRIS. Pastikan file kurang dari 2MB.',
+            'envelopes.*.qr_code_file.image' => 'File QRIS harus berupa gambar.',
+            'envelopes.*.qr_code_file.mimes' => 'Format file QRIS harus berupa jpeg, png, atau jpg.',
+        ], [
+            'events.*.google_maps_link' => 'Link Google Maps',
+            'events.*.start_time' => 'Waktu Mulai',
+            'events.*.end_time' => 'Waktu Selesai',
+            'events.*.name' => 'Nama Acara',
+            'events.*.location_name' => 'Nama Tempat',
+            'events.*.location_address' => 'Alamat Lengkap',
+            'envelopes.*.bank_name' => 'Nama Bank',
+            'envelopes.*.account_name' => 'Atas Nama',
+            'envelopes.*.account_number' => 'Nomor Rekening',
+            'envelopes.*.qr_code_file' => 'File QRIS',
         ]);
 
         try {
