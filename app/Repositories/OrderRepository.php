@@ -23,6 +23,11 @@ class OrderRepository
         return Order::find($id);
     }
 
+    public function findOrFail(int $id): Order
+    {
+        return Order::findOrFail($id);
+    }
+
     public function findByXenditInvoiceId(string $invoiceId): ?Order
     {
         return Order::where('xendit_invoice_id', $invoiceId)->first();
@@ -38,9 +43,27 @@ class OrderRepository
         return Order::with(['user', 'package', 'invitation'])->latest()->get();
     }
 
-    public function getRecentOrders(int $limit = 5): Collection
+    /** @return Collection<int, Order> */
+    public function getOldestPendingOrders(int $limit = 5): Collection
     {
-        return Order::with(['user', 'package', 'invitation'])->latest()->take($limit)->get();
+        return Order::with(['user', 'package'])
+            ->where('status', OrderStatus::Pending)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->take($limit)
+            ->get();
+    }
+
+    public function sumPendingAmount(): int
+    {
+        return (int) Order::where('status', OrderStatus::Pending)->sum('amount');
+    }
+
+    public function markPendingAsPaid(int $id): bool
+    {
+        return Order::whereKey($id)
+            ->where('status', OrderStatus::Pending)
+            ->update(['status' => OrderStatus::Paid]) === 1;
     }
 
     public function sumPaidAmount(): int

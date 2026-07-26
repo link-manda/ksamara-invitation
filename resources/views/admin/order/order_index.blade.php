@@ -42,13 +42,25 @@
                         <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" aria-label="Aksi" />
                         <flux:menu>
                             @if($order->status === \App\Enums\OrderStatus::Pending)
-                                <form action="{{ route('admin.orders.mark-paid', $order->id) }}" method="POST" class="w-full">
-                                    @csrf
-                                    @method('PATCH')
-                                    <flux:menu.item type="submit" icon="check-circle">
-                                        Tandai Lunas
-                                    </flux:menu.item>
-                                </form>
+                                @php
+                                    $order_number = '#ORD-'.str_pad((string) $order->id, 5, '0', STR_PAD_LEFT);
+                                    $formatted_amount = 'Rp '.number_format($order->amount, 0, ',', '.');
+                                @endphp
+                                <flux:menu.item
+                                    as="button"
+                                    type="button"
+                                    icon="check-circle"
+                                    x-data
+                                    x-on:click="$dispatch('open-paid-confirmation', {
+                                        action: @js(route('admin.orders.mark-paid', $order->id)),
+                                        orderNumber: @js($order_number),
+                                        customer: @js($order->user->name),
+                                        packageName: @js($order->package->name),
+                                        amount: @js($formatted_amount),
+                                    })"
+                                >
+                                    Tandai Lunas
+                                </flux:menu.item>
                             @else
                                 <flux:menu.item icon="information-circle" disabled>
                                     Tidak Ada Aksi

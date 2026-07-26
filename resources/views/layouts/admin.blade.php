@@ -54,6 +54,7 @@
 
     <flux:toast position="top right" />
     <x-confirm-delete-modal />
+    <x-confirm-paid-modal />
     @fluxScripts
     <x-flash-messages />
     @stack('script')
