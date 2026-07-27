@@ -12,7 +12,7 @@
 
             <!-- Email Address -->
             <flux:field>
-                <flux:label>Alamat Email</flux:label>
+                <flux:label>Alamat Email <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="email"
                     type="email"
@@ -29,9 +29,9 @@
             <!-- Password -->
             <flux:field>
                 <div class="flex items-center justify-between mb-1.5">
-                    <flux:label>Kata Sandi</flux:label>
+                    <flux:label>Kata Sandi <span class="text-red-500 font-bold">*</span></flux:label>
                     @if (Route::has('password.request'))
-                        <flux:link class="text-xs text-amber-600 hover:text-amber-500 dark:text-amber-400 font-medium" :href="route('password.request')" wire:navigate>
+                        <flux:link class="text-xs text-amber-500 hover:text-amber-400 font-medium" :href="route('password.request')" wire:navigate>
                             Lupa kata sandi?
                         </flux:link>
                     @endif
@@ -58,12 +58,11 @@
             </div>
         </form>
 
-        <div class="space-x-1 text-sm text-center text-zinc-600 dark:text-zinc-400 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+        <div class="space-x-1 text-sm text-center text-zinc-400 pt-4 border-t border-zinc-800">
             <span>Belum memiliki akun?</span>
-            <flux:link :href="route('register')" class="font-medium text-amber-600 dark:text-amber-400 hover:underline" wire:navigate>
+            <flux:link :href="route('register')" class="font-semibold text-amber-400 hover:underline" wire:navigate>
                 Daftar Sekarang
             </flux:link>
         </div>
     </div>
 </x-layouts::auth>
-

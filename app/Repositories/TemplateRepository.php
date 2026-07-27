@@ -9,12 +9,12 @@ class TemplateRepository
 {
     public function getAll(): Collection
     {
-        return Template::latest()->get();
+        return Template::with('packages')->latest()->get();
     }
 
     public function getById(int $id): ?Template
     {
-        return Template::findOrFail($id);
+        return Template::with('packages')->findOrFail($id);
     }
 
     public function create(array $data): Template

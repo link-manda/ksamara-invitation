@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Gallery;
 use App\Models\Invitation;
 use App\Models\Order;
+use App\Models\Template;
 use App\Services\DigitalEnvelopeService;
 use App\Services\EventService;
 use App\Services\GalleryService;
@@ -16,6 +17,7 @@ use App\Services\PackageService;
 use App\Services\TemplateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class InvitationController extends Controller
@@ -40,8 +42,8 @@ class InvitationController extends Controller
             return NotificationHelper::redirectWithError('customer.orders.index', 'Silakan selesaikan pembayaran terlebih dahulu untuk mulai membuat undangan.');
         }
 
-        $packages = $this->packageService->getAllPackages();
-        $templates = $this->templateService->getAllTemplates();
+        $packages = $this->packageService->getActivePackages();
+        $templates = Template::with('packages')->where('is_active', true)->get();
 
         return view('customer.invitation.invitation_create', compact('packages', 'templates'));
     }
@@ -53,12 +55,17 @@ class InvitationController extends Controller
         }
 
         $validated = $request->validate([
-            'package_id' => 'required|exists:packages,id',
+            'package_id' => ['required', Rule::exists('packages', 'id')->where('is_active', true)],
             'template_id' => 'required|exists:templates,id',
             'slug' => 'required|string|max:255|unique:invitations,slug',
             'groom_name' => 'required|string|max:255',
             'bride_name' => 'required|string|max:255',
         ]);
+
+        $template = Template::with('packages')->findOrFail($validated['template_id']);
+        if (! $template->isAvailableForPackage((int) $validated['package_id'])) {
+            return back()->withErrors(['template_id' => 'Template yang dipilih tidak tersedia untuk paket tersebut.'])->withInput();
+        }
 
         $this->invitationService->createInvitationAndOrder($request->user(), $validated);
 

@@ -14,7 +14,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
             <flux:card>
-                <form action="{{ isset($template) ? route('admin.templates.update', $template->id) : route('admin.templates.store') }}" method="POST" class="space-y-6">
+                <form action="{{ isset($template) ? route('admin.templates.update', $template->id) : route('admin.templates.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     @if(isset($template))
                         @method('PUT')
@@ -22,7 +22,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
-                            <flux:label>Nama Template</flux:label>
+                            <flux:label>Nama Template <span class="text-red-500 font-bold">*</span></flux:label>
                             <flux:input 
                                 name="name" 
                                 placeholder="Contoh: Elegan Gold" 
@@ -33,7 +33,7 @@
                         </flux:field>
 
                         <flux:field>
-                            <flux:label>View Path</flux:label>
+                            <flux:label>View Path <span class="text-red-500 font-bold">*</span></flux:label>
                             <flux:input 
                                 name="view_path" 
                                 placeholder="Contoh: themes.elegan_gold" 
@@ -44,6 +44,63 @@
                             <flux:error name="view_path" />
                         </flux:field>
                     </div>
+
+                    <flux:field class="space-y-2" x-data="{
+                        imageUrl: '{{ isset($template) && $template->thumbnail_url ? $template->thumbnail_url : '' }}',
+                        fileChosen(event) {
+                            const file = event.target.files[0];
+                            if (file) {
+                                this.imageUrl = URL.createObjectURL(file);
+                            }
+                        }
+                    }">
+                        <flux:label>Gambar Thumbnail Preview Template <span class="text-xs text-zinc-400 font-normal">(Opsional - Maks 2MB)</span></flux:label>
+                        
+                        <div class="flex flex-col sm:flex-row items-start gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/30">
+                            <!-- Live Preview Container -->
+                            <div class="w-44 h-28 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-xs relative">
+                                <template x-if="imageUrl">
+                                    <img :src="imageUrl" alt="Preview Thumbnail" class="w-full h-full object-cover object-top" />
+                                </template>
+                                <template x-if="!imageUrl">
+                                    <div class="text-center p-2 text-zinc-400 space-y-1">
+                                        <flux:icon icon="photo" class="size-6 mx-auto opacity-50" />
+                                        <span class="text-[10px] block">Belum Ada Gambar</span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="flex-1 space-y-2">
+                                <input 
+                                    type="file" 
+                                    name="thumbnail" 
+                                    accept="image/png, image/jpeg, image/jpg, image/webp" 
+                                    @change="fileChosen"
+                                    class="block w-full text-xs text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-500 hover:file:bg-amber-500/20 cursor-pointer"
+                                />
+                                <flux:description>Upload gambar contoh desain template. Format: JPG, PNG, WEBP. Maksimal ukuran: 2MB.</flux:description>
+                                <flux:error name="thumbnail" />
+                            </div>
+                        </div>
+                    </flux:field>
+
+                    <flux:field class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <flux:label>Ketersediaan Paket Undangan</flux:label>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/30">
+                            @foreach($packages as $package)
+                                <flux:checkbox 
+                                    name="packages[]" 
+                                    value="{{ $package->id }}" 
+                                    label="{{ $package->name }}" 
+                                    :checked="in_array($package->id, old('packages', isset($template) ? $template->packages->pluck('id')->toArray() : []))"
+                                />
+                            @endforeach
+                        </div>
+                        <flux:description>Jika tidak ada paket yang dicentang, template akan otomatis berlaku untuk **Semua Paket (Universal)**.</flux:description>
+                        <flux:error name="packages" />
+                    </flux:field>
 
                     <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/60 dark:bg-zinc-800/40">
                         <flux:checkbox 
@@ -77,7 +134,7 @@
                         resources/views/templates/bali_classic.blade.php &rarr; themes.bali_classic
                     </p>
                     <p>
-                        Pastikan file Blade sudah tersedia di direktori <code>resources/views/</code> sebelum mengaktifkan template ini.
+                        <strong>Thumbnail Preview</strong> digunakan untuk memberikan contoh visual desain template pada halaman Landing Page publik.
                     </p>
                 </flux:text>
             </flux:card>

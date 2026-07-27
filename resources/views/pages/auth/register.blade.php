@@ -10,7 +10,7 @@
 
             <!-- Name -->
             <flux:field>
-                <flux:label>Nama Lengkap</flux:label>
+                <flux:label>Nama Lengkap <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="name"
                     type="text"
@@ -26,7 +26,7 @@
 
             <!-- Email Address -->
             <flux:field>
-                <flux:label>Alamat Email</flux:label>
+                <flux:label>Alamat Email <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="email"
                     type="email"
@@ -41,7 +41,7 @@
 
             <!-- Password -->
             <flux:field>
-                <flux:label>Kata Sandi</flux:label>
+                <flux:label>Kata Sandi <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="password"
                     type="password"
@@ -57,7 +57,7 @@
 
             <!-- Confirm Password -->
             <flux:field>
-                <flux:label>Konfirmasi Kata Sandi</flux:label>
+                <flux:label>Konfirmasi Kata Sandi <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="password_confirmation"
                     type="password"
@@ -78,12 +78,11 @@
             </div>
         </form>
 
-        <div class="space-x-1 text-center text-sm text-zinc-600 dark:text-zinc-400 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+        <div class="space-x-1 text-center text-sm text-zinc-400 pt-4 border-t border-zinc-800">
             <span>Sudah memiliki akun?</span>
-            <flux:link :href="route('login')" class="font-medium text-amber-600 dark:text-amber-400 hover:underline" wire:navigate>
+            <flux:link :href="route('login')" class="font-semibold text-amber-400 hover:underline" wire:navigate>
                 Masuk di sini
             </flux:link>
         </div>
     </div>
 </x-layouts::auth>
-

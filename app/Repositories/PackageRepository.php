@@ -23,6 +23,14 @@ class PackageRepository
         return Package::findOrFail($id);
     }
 
+    public function getActiveById(int $id): Package
+    {
+        return Package::query()
+            ->whereKey($id)
+            ->where('is_active', true)
+            ->firstOrFail();
+    }
+
     public function create(array $data): Package
     {
         return Package::create($data);

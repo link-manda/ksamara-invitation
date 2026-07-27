@@ -23,7 +23,7 @@ class InvitationService
     public function createInvitationAndOrder(User $user, array $data): Invitation
     {
         return DB::transaction(function () use ($user, $data) {
-            $package = $this->packageRepository->getById((int) $data['package_id']);
+            $package = $this->packageRepository->getActiveById((int) $data['package_id']);
 
             $order = $this->orderRepository->create([
                 'user_id' => $user->id,

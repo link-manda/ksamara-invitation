@@ -10,7 +10,7 @@
 
             <!-- Email Address -->
             <flux:field>
-                <flux:label>Alamat Email</flux:label>
+                <flux:label>Alamat Email <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="email"
                     type="email"
@@ -29,12 +29,11 @@
             </div>
         </form>
 
-        <div class="text-center text-sm text-zinc-600 dark:text-zinc-400 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+        <div class="text-center text-sm text-zinc-400 pt-4 border-t border-zinc-800">
             <span>Kembali ke halaman</span>
-            <flux:link :href="route('login')" class="font-medium text-amber-600 dark:text-amber-400 hover:underline" wire:navigate>
+            <flux:link :href="route('login')" class="font-semibold text-amber-400 hover:underline" wire:navigate>
                 Masuk
             </flux:link>
         </div>
     </div>
 </x-layouts::auth>
-

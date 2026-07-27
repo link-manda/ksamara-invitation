@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Package;
 use App\Services\TemplateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,9 @@ class TemplateController extends Controller
 
     public function create(): View
     {
-        return view('template.template_form');
+        $packages = Package::where('is_active', true)->get();
+
+        return view('template.template_form', compact('packages'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -30,7 +33,10 @@ class TemplateController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'view_path' => 'required|string|max:255',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_active' => 'nullable|boolean',
+            'packages' => 'nullable|array',
+            'packages.*' => 'exists:packages,id',
         ]);
 
         $this->templateService->createTemplate($validated);
@@ -41,8 +47,9 @@ class TemplateController extends Controller
     public function edit(int $id): View
     {
         $template = $this->templateService->getTemplateById($id);
+        $packages = Package::where('is_active', true)->get();
 
-        return view('template.template_form', compact('template'));
+        return view('template.template_form', compact('template', 'packages'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -52,7 +59,10 @@ class TemplateController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'view_path' => 'required|string|max:255',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_active' => 'nullable|boolean',
+            'packages' => 'nullable|array',
+            'packages.*' => 'exists:packages,id',
         ]);
 
         $this->templateService->updateTemplate($template, $validated);

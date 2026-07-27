@@ -12,7 +12,7 @@
 
             <!-- Email Address -->
             <flux:field>
-                <flux:label>Alamat Email</flux:label>
+                <flux:label>Alamat Email <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="email"
                     value="{{ request('email') }}"
@@ -26,7 +26,7 @@
 
             <!-- Password -->
             <flux:field>
-                <flux:label>Kata Sandi Baru</flux:label>
+                <flux:label>Kata Sandi Baru <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="password"
                     type="password"
@@ -42,7 +42,7 @@
 
             <!-- Confirm Password -->
             <flux:field>
-                <flux:label>Konfirmasi Kata Sandi</flux:label>
+                <flux:label>Konfirmasi Kata Sandi <span class="text-red-500 font-bold">*</span></flux:label>
                 <flux:input
                     name="password_confirmation"
                     type="password"
@@ -64,4 +64,3 @@
         </form>
     </div>
 </x-layouts::auth>
-

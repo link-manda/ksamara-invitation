@@ -19,13 +19,13 @@
         <flux:spacer />
 
         <flux:navbar class="max-lg:hidden flex items-center gap-2">
-            <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
-            <flux:navbar.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navbar.item>
-            <flux:navbar.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navbar.item>
+            <flux:navbar.item icon="home" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
+            <flux:navbar.item icon="plus-circle" href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navbar.item>
+            <flux:navbar.item icon="shopping-bag" href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navbar.item>
             <x-theme-toggle variant="icon" />
             <form method="POST" action="{{ route('logout') }}" class="inline-block">
                 @csrf
-                <flux:navbar.item as="button" type="submit">
+                <flux:navbar.item as="button" type="submit" icon="arrow-right-start-on-rectangle">
                     Keluar
                 </flux:navbar.item>
             </form>
@@ -44,20 +44,18 @@
         <flux:brand href="/" logo="https://fluxui.dev/img/demo/dark-mode-logo.png" name="Samara" class="px-2 hidden dark:flex" />
         
         <flux:navlist variant="outline">
-            <flux:navlist.item href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
-            <flux:navlist.item href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navlist.item>
-            <flux:navlist.item href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navlist.item>
+            <flux:navlist.item icon="home" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
+            <flux:navlist.item icon="plus-circle" href="{{ route('customer.invitations.create') }}" :current="request()->routeIs('customer.invitations.create')">Buat Undangan</flux:navlist.item>
+            <flux:navlist.item icon="shopping-bag" href="{{ route('customer.orders.index') }}" :current="request()->routeIs('customer.orders.*')">Pesanan Saya</flux:navlist.item>
             <x-theme-toggle variant="nav" />
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
-                <flux:navlist.item as="button" type="submit" class="w-full text-left">
+                <flux:navlist.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full text-left">
                     Keluar
                 </flux:navlist.item>
             </form>
         </flux:navlist>
     </flux:sidebar>
-
-
 
     <flux:main container>
         @yield('content')

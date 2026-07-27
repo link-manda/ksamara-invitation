@@ -9,7 +9,22 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="{
     groom: '{{ old('groom_name', '') }}',
     bride: '{{ old('bride_name', '') }}',
-    slug: '{{ old('slug', '') }}'
+    slug: '{{ old('slug', '') }}',
+    selectedPackage: '{{ old('package_id', '') }}',
+    selectedTemplate: '{{ old('template_id', '') }}',
+    templates: {{ Js::from($templates->map(fn($t) => ['id' => (string)$t->id, 'name' => $t->name, 'package_ids' => $t->packages->pluck('id')->map(fn($id) => (string)$id)->toArray()])) }},
+    get availableTemplates() {
+        if (!this.selectedPackage) return this.templates;
+        return this.templates.filter(t => t.package_ids.length === 0 || t.package_ids.includes(String(this.selectedPackage)));
+    },
+    onPackageChange() {
+        if (this.selectedTemplate) {
+            const isStillValid = this.availableTemplates.some(t => String(t.id) === String(this.selectedTemplate));
+            if (!isStillValid) {
+                this.selectedTemplate = '';
+            }
+        }
+    }
 }">
     <div class="lg:col-span-2">
         <flux:card>
@@ -18,8 +33,8 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:field>
-                        <flux:label>Pilih Paket Undangan</flux:label>
-                        <flux:select name="package_id" placeholder="Pilih paket undangan" required>
+                        <flux:label>Pilih Paket Undangan <span class="text-red-500 font-bold">*</span></flux:label>
+                        <flux:select name="package_id" placeholder="Pilih paket undangan" x-model="selectedPackage" @change="onPackageChange()" required>
                             @foreach($packages as $package)
                                 <flux:select.option value="{{ $package->id }}">{{ $package->name }} - Rp {{ number_format($package->price, 0, ',', '.') }}</flux:select.option>
                             @endforeach
@@ -28,18 +43,18 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Pilih Desain Template</flux:label>
-                        <flux:select name="template_id" placeholder="Pilih desain template" required>
-                            @foreach($templates as $template)
-                                <flux:select.option value="{{ $template->id }}">{{ $template->name }}</flux:select.option>
-                            @endforeach
+                        <flux:label>Pilih Desain Template <span class="text-red-500 font-bold">*</span></flux:label>
+                        <flux:select name="template_id" placeholder="Pilih desain template" x-model="selectedTemplate" required>
+                            <template x-for="tpl in availableTemplates" :key="tpl.id">
+                                <option :value="tpl.id" x-text="tpl.name" :selected="String(tpl.id) === String(selectedTemplate)"></option>
+                            </template>
                         </flux:select>
                         <flux:error name="template_id" />
                     </flux:field>
                 </div>
 
                 <flux:field>
-                    <flux:label>URL Undangan (Slug)</flux:label>
+                    <flux:label>URL Undangan (Slug) <span class="text-red-500 font-bold">*</span></flux:label>
                     <flux:input 
                         name="slug" 
                         placeholder="Contoh: romeo-juliet" 
@@ -52,7 +67,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:field>
-                        <flux:label>Nama Mempelai Pria</flux:label>
+                        <flux:label>Nama Mempelai Pria <span class="text-red-500 font-bold">*</span></flux:label>
                         <flux:input 
                             name="groom_name" 
                             placeholder="Contoh: Romeo" 
@@ -63,7 +78,7 @@
                     </flux:field>
                     
                     <flux:field>
-                        <flux:label>Nama Mempelai Wanita</flux:label>
+                        <flux:label>Nama Mempelai Wanita <span class="text-red-500 font-bold">*</span></flux:label>
                         <flux:input 
                             name="bride_name" 
                             placeholder="Contoh: Juliet" 

@@ -14,6 +14,7 @@
         <flux:table.columns>
             <flux:table.column>Nama Template</flux:table.column>
             <flux:table.column>View Path</flux:table.column>
+            <flux:table.column>Paket Terkait</flux:table.column>
             <flux:table.column>Status</flux:table.column>
             <flux:table.column align="center">Aksi</flux:table.column>
         </flux:table.columns>
@@ -21,10 +22,28 @@
             @foreach($templates as $template)
             <flux:table.row>
                 <flux:table.cell>
-                    <span class="font-medium text-zinc-900 dark:text-white">{{ $template->name }}</span>
+                    <div class="flex items-center gap-3">
+                        @if($template->thumbnail_url)
+                            <img src="{{ $template->thumbnail_url }}" alt="{{ $template->name }}" class="w-10 h-10 rounded-lg object-cover object-top border border-zinc-200 dark:border-zinc-700 shrink-0 shadow-xs" />
+                        @else
+                            <div class="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-400 shrink-0">
+                                <flux:icon icon="photo" class="size-5 opacity-60" />
+                            </div>
+                        @endif
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $template->name }}</span>
+                    </div>
                 </flux:table.cell>
                 <flux:table.cell>
                     <flux:badge size="sm" color="zinc">{{ $template->view_path }}</flux:badge>
+                </flux:table.cell>
+                <flux:table.cell>
+                    <div class="flex flex-wrap gap-1">
+                        @forelse($template->packages as $pkg)
+                            <flux:badge size="sm" color="amber">{{ $pkg->name }}</flux:badge>
+                        @empty
+                            <flux:badge size="sm" color="zinc">Semua Paket</flux:badge>
+                        @endforelse
+                    </div>
                 </flux:table.cell>
                 <flux:table.cell>
                     @if($template->is_active)
