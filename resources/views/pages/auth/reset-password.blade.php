@@ -57,7 +57,7 @@
             </flux:field>
 
             <div class="pt-2">
-                <flux:button type="submit" variant="primary" class="w-full" icon="check" data-test="reset-password-button">
+                <flux:button type="submit" variant="primary" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold shadow-lg shadow-blue-600/25 hover:from-blue-700 hover:to-blue-800 active:scale-95 transition-all duration-300" icon="check" data-test="reset-password-button">
                     Simpan Kata Sandi Baru
                 </flux:button>
             </div>

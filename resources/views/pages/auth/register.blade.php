@@ -72,15 +72,15 @@
             </flux:field>
 
             <div class="pt-2">
-                <flux:button type="submit" variant="primary" class="w-full" icon="user-plus" data-test="register-user-button">
+                <flux:button type="submit" variant="primary" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold shadow-lg shadow-blue-600/25 hover:from-blue-700 hover:to-blue-800 active:scale-95 transition-all duration-300" icon="user-plus" data-test="register-user-button">
                     Daftar Akun Baru
                 </flux:button>
             </div>
         </form>
 
-        <div class="space-x-1 text-center text-sm text-zinc-400 pt-4 border-t border-zinc-800">
+        <div class="space-x-1 text-center text-sm text-slate-500 pt-4 border-t border-slate-200">
             <span>Sudah memiliki akun?</span>
-            <flux:link :href="route('login')" class="font-semibold text-amber-400 hover:underline" wire:navigate>
+            <flux:link :href="route('login')" class="font-semibold text-blue-600 hover:underline" wire:navigate>
                 Masuk di sini
             </flux:link>
         </div>

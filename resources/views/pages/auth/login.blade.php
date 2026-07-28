@@ -31,7 +31,7 @@
                 <div class="flex items-center justify-between mb-1.5">
                     <flux:label>Kata Sandi <span class="text-red-500 font-bold">*</span></flux:label>
                     @if (Route::has('password.request'))
-                        <flux:link class="text-xs text-amber-500 hover:text-amber-400 font-medium" :href="route('password.request')" wire:navigate>
+                        <flux:link class="text-xs text-blue-600 hover:text-blue-700 font-semibold" :href="route('password.request')" wire:navigate>
                             Lupa kata sandi?
                         </flux:link>
                     @endif
@@ -52,15 +52,15 @@
             <flux:checkbox name="remember" label="Ingat saya di perangkat ini" :checked="old('remember')" />
 
             <div class="pt-2">
-                <flux:button variant="primary" type="submit" class="w-full" icon="arrow-right-end-on-rectangle" data-test="login-button">
+                <flux:button variant="primary" type="submit" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold shadow-lg shadow-blue-600/25 hover:from-blue-700 hover:to-blue-800 active:scale-95 transition-all duration-300" icon="arrow-right-end-on-rectangle" data-test="login-button">
                     Masuk ke Akun
                 </flux:button>
             </div>
         </form>
 
-        <div class="space-x-1 text-sm text-center text-zinc-400 pt-4 border-t border-zinc-800">
+        <div class="space-x-1 text-sm text-center text-slate-500 pt-4 border-t border-slate-200">
             <span>Belum memiliki akun?</span>
-            <flux:link :href="route('register')" class="font-semibold text-amber-400 hover:underline" wire:navigate>
+            <flux:link :href="route('register')" class="font-semibold text-blue-600 hover:underline" wire:navigate>
                 Daftar Sekarang
             </flux:link>
         </div>
