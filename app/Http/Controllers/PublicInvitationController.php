@@ -17,7 +17,7 @@ class PublicInvitationController extends Controller
         private readonly RsvpService $rsvpService
     ) {}
 
-    public function show(string $slug): View
+    public function show(Request $request, string $slug): View
     {
         $invitation = $this->invitationRepository->findBySlugWithRelations($slug);
 
@@ -32,8 +32,14 @@ class PublicInvitationController extends Controller
         $ogTitle = $invitation->title.' - Undangan Pernikahan';
         $ogDescription = 'Kami mengundang Anda untuk hadir di acara pernikahan kami.';
         $ogImage = $invitation->galleries->isNotEmpty() ? asset('storage/'.$invitation->galleries->first()->file_path) : asset('img/default-og.jpg');
+        $guestName = $request->query('to', '');
+        $rsvpCounts = [
+            'hadir' => $invitation->rsvps->where('status', 'hadir')->count(),
+            'tidak_hadir' => $invitation->rsvps->where('status', 'tidak_hadir')->count(),
+            'total' => $invitation->rsvps->count(),
+        ];
 
-        return view('templates.'.$invitation->template->view_path, compact('invitation', 'ogTitle', 'ogDescription', 'ogImage'));
+        return view('templates.'.$invitation->template->view_path, compact('invitation', 'ogTitle', 'ogDescription', 'ogImage', 'guestName', 'rsvpCounts'));
     }
 
     public function rsvp(Request $request, string $slug): RedirectResponse

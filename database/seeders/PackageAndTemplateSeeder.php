@@ -112,7 +112,7 @@ class PackageAndTemplateSeeder extends Seeder
             ['view_path' => 'scrolly_candi_bentar'],
             [
                 'name' => 'Candi Bentar Scrollytelling',
-                'thumbnail_path' => '/images/scrollytelling/candi-bentar/frame_030.webp',
+                'thumbnail_path' => 'images/scrollytelling/candi-bentar/cover.webp',
                 'is_active' => true,
             ]
         );

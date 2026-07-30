@@ -28,14 +28,28 @@
         images: [],
         loadedImages: 0,
         isLoaded: false,
+        isCoverOpen: true,
         progress: 0,
         isPlayingBgm: false,
         audioEl: null,
+        countdown: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        countdownDone: false,
+        lightbox: null,
+        openLightbox(url) { this.lightbox = url; },
+        closeLightbox() { this.lightbox = null; },
 
         init() {
+            document.body.style.overflow = 'hidden';
             this.preloadImages();
-            window.addEventListener('scroll', () => this.handleScroll(), { passive: true });
+            window.addEventListener('scroll', () => {
+                if (window.innerWidth < 1024) this.handleScroll();
+            }, { passive: true });
             window.addEventListener('resize', () => this.renderCanvas(this.currentFrame), { passive: true });
+        },
+
+        openInvitation() {
+            this.isCoverOpen = false;
+            document.body.style.overflow = '';
         },
 
         preloadImages() {
@@ -115,9 +129,42 @@
 
         scrollToContent() {
             let target = document.getElementById('mempelai');
-            if (target) {
+            if (!target) return;
+            let panel = this.$refs.rightPanel;
+            if (panel && window.innerWidth >= 1024) {
+                panel.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+            } else {
                 target.scrollIntoView({ behavior: 'smooth' });
             }
+        },
+
+        handleScrollDesktop() {
+            let panel = this.$refs.rightPanel;
+            if (!panel) return;
+            let totalScrollable = panel.scrollHeight - panel.clientHeight;
+            if (totalScrollable <= 0) return;
+            this.progress = Math.max(0, Math.min(1, panel.scrollTop / totalScrollable));
+        },
+
+        initCountdown(targetDateStr) {
+            const update = () => {
+                const now = new Date().getTime();
+                const target = new Date(targetDateStr).getTime();
+                const diff = target - now;
+
+                if (diff <= 0) {
+                    this.countdownDone = true;
+                    this.countdown = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+                    return;
+                }
+
+                this.countdown.days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+                this.countdown.hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                this.countdown.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                this.countdown.seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            };
+            update();
+            setInterval(update, 1000);
         }
     }"
     class="bg-[#FAF7F2] font-['Outfit',sans-serif] text-[#2C1810] antialiased relative selection:bg-[#C59B27]/20 selection:text-[#7A5230] py-0 lg:py-8"
@@ -136,6 +183,11 @@
         </div>
         <div class="space-y-2">
             <h3 class="text-xl font-serif font-bold text-[#2C1810] tracking-wide">Mempersiapkan Sinematik Undangan...</h3>
+            @if($guestName)
+            <p class="text-sm font-serif text-[#7A5230]">
+                Kepada Yth: <span class="font-bold text-[#2C1810]">{{ $guestName }}</span>
+            </p>
+            @endif
             <p class="text-xs text-[#7A5230] font-mono">Memuat Frame (<span x-text="loadedImages"></span> / <span x-text="totalFrames"></span>)</p>
         </div>
         <div class="w-64 bg-[#E8DFC8] h-2 rounded-full overflow-hidden border border-[#DCD0B9]">
@@ -143,8 +195,68 @@
         </div>
     </div>
 
-    <!-- 1. FIXED FULLSCREEN BACKGROUND CANVAS LAYER -->
-    <div class="fixed inset-0 z-0 w-full h-full overflow-hidden bg-[#FAF7F2] pointer-events-none">
+    <!-- COVER SCREEN -->
+    <div
+        x-show="isLoaded && isCoverOpen"
+        x-transition:leave="transition ease-in-out duration-700"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-105"
+        class="fixed inset-0 z-40 flex items-center justify-center p-6"
+    >
+        <div class="w-full max-w-sm mx-auto rounded-3xl bg-[#FAF7F2]/88 border border-[#C59B27]/50 ring-1 ring-[#2C1810]/8 shadow-2xl backdrop-blur-2xl p-8 space-y-6 text-center">
+
+            <div class="flex items-center justify-center gap-3">
+                <div class="h-px flex-1 bg-linear-to-r from-transparent to-[#C59B27]/40"></div>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" class="text-[#C59B27] shrink-0">
+                    <path d="M10 2L11.5 7.5H17L12.5 11L14 16.5L10 13.5L6 16.5L7.5 11L3 7.5H8.5L10 2Z" fill="currentColor" opacity="0.6"/>
+                </svg>
+                <div class="h-px flex-1 bg-linear-to-l from-transparent to-[#C59B27]/40"></div>
+            </div>
+
+            @if($guestName)
+            <div class="space-y-0.5">
+                <p class="text-[10px] uppercase tracking-[0.25em] text-[#C59B27] font-bold">Kepada Yth</p>
+                <p class="font-serif text-lg font-bold text-[#2C1810]">{{ $guestName }}</p>
+            </div>
+            @else
+            <p class="text-[10px] uppercase tracking-[0.25em] text-[#C59B27] font-bold">Undangan Pernikahan</p>
+            @endif
+
+            <div class="space-y-1">
+                <h1 class="font-serif text-3xl font-extrabold text-[#2C1810] tracking-tight leading-tight">
+                    {{ $invitation->groom_name }}
+                </h1>
+                <span class="font-['Great_Vibes',serif] text-[#C59B27] text-4xl font-normal block leading-none">&</span>
+                <h1 class="font-serif text-3xl font-extrabold text-[#2C1810] tracking-tight leading-tight">
+                    {{ $invitation->bride_name }}
+                </h1>
+            </div>
+
+            @if($invitation->events && $invitation->events->isNotEmpty())
+            <p class="text-xs text-[#7A5230] font-semibold tracking-wide">
+                {{ $invitation->events->first()->start_time?->translatedFormat('d F Y') ?? '' }}
+            </p>
+            @endif
+
+            <div class="w-16 h-0.5 bg-linear-to-r from-transparent via-[#C59B27]/60 to-transparent mx-auto"></div>
+
+            <button
+                type="button"
+                @click="openInvitation()"
+                class="w-full py-3.5 rounded-2xl bg-linear-to-r from-[#7A5230] via-[#8C5D36] to-[#5C3A21] text-white font-bold text-sm shadow-lg shadow-[#7A5230]/25 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Buka Undangan
+            </button>
+
+            <p class="text-[10px] text-[#7A5230]/70 font-medium">Sentuh untuk membuka undangan</p>
+        </div>
+    </div>
+
+    <!-- 1. FIXED FULLSCREEN BACKGROUND CANVAS LAYER (mobile only) -->
+    <div class="fixed inset-0 z-0 w-full h-full overflow-hidden bg-[#FAF7F2] pointer-events-none lg:hidden">
         <!-- Canvas Rendering Layer -->
         <canvas x-ref="canvas" class="w-full h-full object-cover"></canvas>
         
@@ -157,7 +269,10 @@
     </div>
 
     <!-- Floating Audio Control Button -->
-    <div class="fixed bottom-6 right-6 lg:right-[calc(50vw-230px)] z-40">
+    <div
+        class="fixed bottom-6 right-6 lg:right-8 z-40 transition-opacity duration-500"
+        :class="isCoverOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+    >
         <button 
             @click="toggleBgm()"
             type="button" 
@@ -171,11 +286,61 @@
         </audio>
     </div>
 
-    <!-- 2. CENTERED SMARTPHONE FRAME CONTAINER ON DESKTOP (Z-INDEX 10) -->
-    <div class="relative z-10 max-w-md mx-auto min-h-screen lg:min-h-[calc(100vh-4rem)] bg-[#FDFBF7]/40 shadow-2xl lg:shadow-[0_0_80px_rgba(197,155,39,0.18)] border-x border-[#E8DFC8]/50 lg:rounded-[40px] lg:border-[6px] lg:border-[#7A5230]/60 lg:ring-4 lg:ring-[#C59B27]/15 overflow-hidden pb-20">
+    <!-- DESKTOP SPLIT WRAPPER -->
+    <div class="lg:flex lg:h-screen lg:overflow-hidden lg:fixed lg:inset-0 lg:z-10">
 
-        <!-- A: Phone Status Bar (desktop only) -->
-        <div class="hidden lg:flex items-center justify-between px-6 pt-3.5 pb-1 text-[#2C1810]/50 text-[10px] font-semibold select-none relative">
+        <!-- LEFT PANEL (desktop only) -->
+        <div class="hidden lg:flex lg:w-[65%] lg:relative lg:flex-col lg:items-center lg:justify-center lg:overflow-hidden">
+            @php $coverPhoto = $invitation->galleries->first(); @endphp
+            <img
+                src="{{ $coverPhoto ? Storage::url($coverPhoto->file_path) : asset('images/scrollytelling/candi-bentar/cover.webp') }}"
+                alt="Cover"
+                class="absolute inset-0 w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-linear-to-br from-[#2C1810]/70 via-[#2C1810]/40 to-[#7A5230]/60"></div>
+            <div class="absolute inset-x-0 bottom-0 h-48 bg-linear-to-t from-[#2C1810]/80 to-transparent"></div>
+
+            <div class="relative z-10 text-center p-10 space-y-4">
+                <p class="text-[11px] uppercase tracking-[0.3em] text-[#C59B27] font-bold">The Wedding Celebration</p>
+                <div class="w-12 h-0.5 bg-linear-to-r from-transparent via-[#C59B27]/60 to-transparent mx-auto"></div>
+                <h2 class="font-['Great_Vibes',serif] text-6xl text-white leading-tight drop-shadow-lg">
+                    {{ $invitation->groom_name }}
+                </h2>
+                <span class="text-[#C59B27] text-4xl font-serif block leading-none">&</span>
+                <h2 class="font-['Great_Vibes',serif] text-6xl text-white leading-tight drop-shadow-lg">
+                    {{ $invitation->bride_name }}
+                </h2>
+                @if($invitation->events && $invitation->events->isNotEmpty() && $invitation->events->first()->start_time)
+                <div class="w-12 h-0.5 bg-linear-to-r from-transparent via-[#C59B27]/60 to-transparent mx-auto"></div>
+                <p class="text-white/80 text-sm font-medium tracking-widest">
+                    {{ $invitation->events->first()->start_time->translatedFormat('d F Y') }}
+                </p>
+                @endif
+                @if($guestName)
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-[#C59B27]/40 backdrop-blur-sm">
+                    <span class="text-[10px] uppercase tracking-widest text-[#C59B27] font-bold">Kepada Yth</span>
+                    <span class="text-white text-sm font-bold">{{ $guestName }}</span>
+                </div>
+                @endif
+            </div>
+
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-[#C59B27]/50 text-[10px] tracking-widest uppercase font-bold">
+                Samara Invitation
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL — konten undangan scroll independent -->
+        <div
+            class="lg:w-[35%] lg:h-screen lg:overflow-y-auto lg:bg-[#FAF7F2]"
+            x-ref="rightPanel"
+            @scroll.passive="handleScrollDesktop()"
+        >
+
+    <!-- 2. PHONE CONTAINER (mobile full / desktop right panel clean) -->
+    <div class="relative z-10 max-w-md mx-auto min-h-screen bg-[#FDFBF7]/40 shadow-2xl border-x border-[#E8DFC8]/50 overflow-hidden pb-20 lg:shadow-none lg:border-x-0 lg:max-w-none lg:mx-0 lg:px-6">
+
+        <!-- A: Phone Status Bar (mobile only) -->
+        <div class="hidden items-center justify-between px-6 pt-3.5 pb-1 text-[#2C1810]/50 text-[10px] font-semibold select-none relative">
             <span>12:00</span>
             <!-- Dynamic Island / Notch pill -->
             <div class="absolute left-1/2 -translate-x-1/2 top-2 w-20 h-5 bg-[#2C1810]/10 rounded-full border border-[#2C1810]/8"></div>
@@ -208,7 +373,14 @@
                     <flux:icon icon="sparkles" class="size-3.5 text-[#C59B27]" />
                     <span>The Wedding Celebration</span>
                 </div>
-                
+
+                @if($guestName)
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C59B27]/15 border border-[#C59B27]/40 backdrop-blur-sm">
+                    <span class="text-[10px] uppercase tracking-widest text-[#C59B27] font-bold">Kepada Yth</span>
+                    <span class="text-xs text-[#2C1810] font-bold">{{ $guestName }}</span>
+                </div>
+                @endif
+
                 <h1 class="font-serif text-3xl sm:text-4xl font-extrabold text-[#2C1810] tracking-tight leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]">
                     {{ $invitation->groom_name }} <span class="font-['Great_Vibes',serif] text-[#C59B27] text-4xl sm:text-5xl font-normal drop-shadow-xs">&</span> {{ $invitation->bride_name }}
                 </h1>
@@ -229,6 +401,18 @@
                         <flux:icon icon="arrow-down" class="size-4" />
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- OM SWASTYASTU SECTION -->
+        <section class="py-6 px-4 text-center">
+            <div class="space-y-2">
+                <p class="font-['Great_Vibes',serif] text-[#C59B27] text-4xl leading-relaxed">Om Swastyastu</p>
+                <div class="w-12 h-0.5 bg-linear-to-r from-transparent via-[#C59B27]/50 to-transparent mx-auto"></div>
+                <p class="text-xs text-[#7A5230] font-medium leading-relaxed max-w-xs mx-auto">
+                    Dengan memohon Asung Kerta Wara Nugraha Ida Sang Hyang Widhi Wasa,<br>
+                    kami mengundang Anda dengan penuh rasa syukur dan kebahagiaan.
+                </p>
             </div>
         </section>
 
@@ -294,7 +478,7 @@
                 <!-- Bride Card -->
                 <div
                     :class="visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'"
-                    class="rounded-2xl bg-white/94 border border-[#C59B27]/40 ring-1 ring-[#2C1810]/8 p-4 space-y-3 shadow-xl shadow-[#2C1810]/5 backdrop-blur-md text-center transition-all duration-600 ease-out delay-[250ms]"
+                    class="rounded-2xl bg-white/94 border border-[#C59B27]/40 ring-1 ring-[#2C1810]/8 p-4 space-y-3 shadow-xl shadow-[#2C1810]/5 backdrop-blur-md text-center transition-all duration-600 ease-out delay-250"
                 >
                     <div class="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-[#C59B27] to-[#7A5230] p-0.5 shadow-md shadow-[#C59B27]/20">
                         <div class="w-full h-full rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#7A5230] font-serif text-xl font-bold">
@@ -311,6 +495,41 @@
                 </div>
             </div>
         </section>
+
+        <!-- COUNTDOWN SECTION -->
+        @if($invitation->events && $invitation->events->isNotEmpty() && $invitation->events->first()->start_time)
+        <section
+            x-data="{ visible: false }"
+            x-init="
+                let obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { visible = true; obs.disconnect(); } }, { threshold: 0.1 }); obs.observe($el);
+                initCountdown('{{ $invitation->events->first()->start_time->toIso8601String() }}');
+            "
+            :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+            class="py-10 px-4 text-center transition-all duration-700 ease-out"
+        >
+            <div class="w-full max-w-sm mx-auto rounded-3xl bg-[#FAF7F2]/92 border border-[#C59B27]/40 ring-1 ring-[#2C1810]/8 shadow-xl backdrop-blur-md p-6 space-y-5">
+                <span class="text-[11px] uppercase tracking-[0.25em] text-[#C59B27] font-bold block">Menuju Hari Bahagia</span>
+
+                <div x-show="!countdownDone" class="grid grid-cols-4 gap-2">
+                    <template x-for="item in [
+                        { val: countdown.days, label: 'Hari' },
+                        { val: countdown.hours, label: 'Jam' },
+                        { val: countdown.minutes, label: 'Menit' },
+                        { val: countdown.seconds, label: 'Detik' }
+                    ]">
+                        <div class="rounded-2xl bg-[#C59B27]/10 border border-[#C59B27]/30 py-3 px-1 space-y-0.5">
+                            <div class="font-serif text-2xl font-extrabold text-[#2C1810]" x-text="String(item.val).padStart(2, '0')"></div>
+                            <div class="text-[9px] uppercase tracking-widest text-[#7A5230] font-bold" x-text="item.label"></div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="countdownDone" class="py-2">
+                    <p class="font-serif text-lg font-bold text-[#C59B27]">Hari Bahagia Telah Tiba!</p>
+                </div>
+            </div>
+        </section>
+        @endif
 
         <!-- 4. RANGKAIAN ACARA SECTION (High Contrast Glass Cards) -->
         @if($invitation->events && $invitation->events->count() > 0)
@@ -355,14 +574,27 @@
                         <p class="leading-relaxed">{{ $loop_event->location_address }}</p>
                     </div>
 
-                    @if($loop_event->google_maps_link)
-                    <div class="pt-2">
+                    @php
+                        $calStart = $loop_event->start_time?->format('Ymd\THis\Z') ?? '';
+                        $calEnd   = $loop_event->end_time?->format('Ymd\THis\Z') ?? ($loop_event->start_time?->addHours(3)->format('Ymd\THis\Z') ?? '');
+                        $calTitle = urlencode($loop_event->name . ' - ' . $invitation->groom_name . ' & ' . $invitation->bride_name);
+                        $calLoc   = urlencode(($loop_event->location_name ?? '') . ', ' . ($loop_event->location_address ?? ''));
+                        $calUrl   = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$calTitle}&dates={$calStart}/{$calEnd}&location={$calLoc}";
+                    @endphp
+                    <div class="pt-2 space-y-2">
+                        @if($loop_event->google_maps_link)
                         <a href="{{ $loop_event->google_maps_link }}" target="_blank" class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#DCD0B9] text-[#2C1810] hover:bg-[#E8DFC8]/60 text-xs font-semibold backdrop-blur-sm transition-all">
                             <flux:icon icon="map-pin" class="size-4 text-[#C59B27]" />
                             <span>Buka Google Maps</span>
                         </a>
+                        @endif
+                        @if($calStart)
+                        <a href="{{ $calUrl }}" target="_blank" class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#DCD0B9] text-[#2C1810] hover:bg-[#E8DFC8]/60 text-xs font-semibold backdrop-blur-sm transition-all">
+                            <flux:icon icon="calendar-days" class="size-4 text-[#C59B27]" />
+                            <span>Simpan ke Kalender</span>
+                        </a>
+                        @endif
                     </div>
-                    @endif
                 </div>
                 @endforeach
             </div>
@@ -392,10 +624,16 @@
                 @foreach($invitation->galleries as $gallery)
                 <div
                     :class="visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'"
-                    class="group overflow-hidden rounded-xl border border-[#C59B27]/30 bg-white/90 backdrop-blur-xs relative shadow-lg transition-all duration-500 ease-out {{ $loop->first ? 'col-span-2 aspect-video' : 'aspect-4/5' }}"
+                    class="group rounded-xl border border-[#C59B27]/30 bg-white/90 overflow-hidden shadow-lg transition-all duration-500 ease-out cursor-pointer"
                     style="transition-delay: {{ $loop->index * 80 }}ms"
+                    @click="openLightbox('{{ Storage::url($gallery->file_path) }}')"
                 >
-                    <img src="{{ Storage::url($gallery->file_path) }}" alt="Gallery Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img
+                        src="{{ Storage::url($gallery->file_path) }}"
+                        alt="Gallery Image"
+                        class="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                    />
                 </div>
                 @endforeach
             </div>
@@ -462,6 +700,19 @@
                 </h2>
                 <div class="w-16 h-0.5 bg-linear-to-r from-transparent via-[#C59B27]/60 to-transparent mx-auto"></div>
             </div>
+
+            @if($rsvpCounts['total'] > 0)
+            <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-4 text-center space-y-1">
+                    <div class="text-2xl font-extrabold font-serif text-emerald-700">{{ $rsvpCounts['hadir'] }}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-emerald-600 font-bold">Hadir</div>
+                </div>
+                <div class="rounded-2xl bg-red-500/10 border border-red-500/30 p-4 text-center space-y-1">
+                    <div class="text-2xl font-extrabold font-serif text-red-700">{{ $rsvpCounts['tidak_hadir'] }}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-red-500 font-bold">Tidak Hadir</div>
+                </div>
+            </div>
+            @endif
 
             @if(session('success'))
                 <div class="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-900 text-xs text-center font-bold backdrop-blur-md">
@@ -533,10 +784,39 @@
             &copy; {{ date('Y') }} {{ $invitation->title ?? 'Samara Invitation' }}. Hak cipta dilindungi.
         </footer>
 
-        <!-- A: Home Indicator (desktop only) -->
-        <div class="hidden lg:flex justify-center py-3">
-            <div class="w-24 h-1 bg-[#2C1810]/20 rounded-full"></div>
-        </div>
+    </div><!-- end phone container -->
+        </div><!-- end RIGHT PANEL -->
+    </div><!-- end DESKTOP SPLIT WRAPPER -->
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div
+        x-show="lightbox"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        @click="closeLightbox()"
+        @keydown.escape.window="closeLightbox()"
+        class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+        style="display: none;"
+    >
+        <img
+            :src="lightbox"
+            @click.stop
+            class="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+            alt="Foto"
+        />
+        <button
+            type="button"
+            @click="closeLightbox()"
+            class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+        >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
     </div>
 
 @fluxScripts
