@@ -98,13 +98,25 @@ class PackageAndTemplateSeeder extends Seeder
         $tplRusticRomance->packages()->sync([$packageSilver->id, $packageGold->id]);
 
         $tplLuxuryGold = Template::updateOrCreate(
-            ['view_path' => 'themes.luxury_gold'],
+            ['view_path' => 'luxury_gold'],
             [
                 'name' => 'Royal Luxury Gold',
+                'thumbnail_path' => 'images/scrollytelling/candi-bentar/frame_030.webp',
                 'is_active' => true,
             ]
         );
         // Tersedia khusus untuk Paket Gold
         $tplLuxuryGold->packages()->sync([$packageGold->id]);
+
+        $tplCandiBentarScrolly = Template::updateOrCreate(
+            ['view_path' => 'scrolly_candi_bentar'],
+            [
+                'name' => 'Candi Bentar Scrollytelling',
+                'thumbnail_path' => '/images/scrollytelling/candi-bentar/frame_030.webp',
+                'is_active' => true,
+            ]
+        );
+        // Tersedia khusus untuk Paket Silver & Gold
+        $tplCandiBentarScrolly->packages()->sync([$packageSilver->id, $packageGold->id]);
     }
 }

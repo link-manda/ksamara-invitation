@@ -112,7 +112,7 @@
 
                 <!-- Right Live Device Mockup Showcase -->
                 <div class="lg:col-span-5 relative flex justify-center">
-                    <div class="relative w-full max-w-[340px] rounded-[40px] border-[8px] border-slate-800 bg-slate-900 p-4 shadow-2xl shadow-blue-600/15">
+                    <div class="relative w-full max-w-[340px] rounded-[40px] border-[8px] border-slate-300 bg-slate-900 p-4 shadow-2xl shadow-blue-600/15">
                         <!-- Mockup Top Speaker Bar -->
                         <div class="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-4 bg-slate-800 rounded-full flex items-center justify-center gap-2 z-20">
                             <div class="w-2 h-2 rounded-full bg-slate-950"></div>
@@ -206,7 +206,7 @@
             <!-- Dynamic Templates Grid (iPhone SE 375px x 667px Frames 9:16) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 max-w-7xl mx-auto justify-items-center items-stretch">
                 @forelse($templates as $template)
-                <div class="w-full max-w-[375px] sm:max-w-[375px] h-[667px] mx-auto rounded-[3rem] bg-slate-950 border-[8px] border-slate-800/90 shadow-2xl relative overflow-hidden flex flex-col group transition-all duration-500 hover:shadow-blue-600/20 hover:border-blue-500/80">
+                <div class="w-full max-w-[375px] sm:max-w-[375px] h-[667px] mx-auto rounded-[3rem] bg-slate-950 border-[8px] border-slate-300 shadow-2xl relative overflow-hidden flex flex-col group transition-all duration-500 hover:shadow-blue-600/20 hover:border-blue-500/80">
                     <!-- iPhone SE Notch Speaker Island Bar -->
                     <div class="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-5 bg-slate-900 rounded-full z-40 flex items-center justify-center border border-slate-800/80 shadow-xs">
                         <div class="size-2.5 rounded-full bg-slate-950"></div>
@@ -232,8 +232,7 @@
                         <!-- Bottom Gradient Overlay with Information & Dual Buttons -->
                         <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent p-6 z-30 flex flex-col justify-end space-y-3.5 backdrop-blur-xs">
                             <!-- Top Badge Row -->
-                            <div class="flex items-center justify-between">
-                                <flux:badge color="blue" size="sm" class="shadow-md">iPhone SE (9:16)</flux:badge>
+                            <div class="flex items-center justify-start">
                                 <span class="text-[11px] text-slate-300 font-mono bg-slate-900/90 px-2.5 py-0.5 rounded-md border border-slate-700/60">{{ $template->name }}</span>
                             </div>
 
