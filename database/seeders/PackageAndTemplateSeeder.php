@@ -113,6 +113,8 @@ class PackageAndTemplateSeeder extends Seeder
             [
                 'name' => 'Candi Bentar Scrollytelling',
                 'thumbnail_path' => 'images/scrollytelling/candi-bentar/cover.webp',
+                'default_cover_path' => 'images/scrollytelling/candi-bentar/cover.webp',
+                'default_cover_bg_color' => '#FAF7F2',
                 'is_active' => true,
             ]
         );

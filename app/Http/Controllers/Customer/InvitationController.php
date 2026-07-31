@@ -133,11 +133,21 @@ class InvitationController extends Controller
             'envelopes.*.account_number' => 'nullable|string|max:255',
             'envelopes.*.qr_code_file' => 'nullable|file|image|mimes:jpeg,png,jpg|max:2048',
 
+            'cover_image' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:3072',
+            'cover_bg_color' => 'nullable|string|max:7',
+            'cover_recipient' => 'nullable|string|max:255',
+            'remove_cover_image' => 'nullable|boolean',
+
             'music_path' => 'nullable|string',
         ], [
             'title.required' => 'Judul Undangan wajib diisi.',
             'groom_name.required' => 'Nama Mempelai Pria wajib diisi.',
             'bride_name.required' => 'Nama Mempelai Wanita wajib diisi.',
+
+            'cover_image.max' => 'Ukuran gambar sampul/cover melebihi batas 3MB.',
+            'cover_image.uploaded' => 'Gagal mengunggah gambar cover. Pastikan file kurang dari 3MB.',
+            'cover_image.image' => 'File cover harus berupa gambar.',
+            'cover_image.mimes' => 'Format gambar cover harus berupa jpeg, png, jpg, atau webp.',
 
             'events.*.name.required' => 'Nama Acara wajib diisi.',
             'events.*.start_time.required' => 'Waktu Mulai Acara wajib diisi.',
@@ -174,6 +184,12 @@ class InvitationController extends Controller
 
         try {
             $this->invitationService->updateInvitation($invitation, $validated);
+
+            if (! empty($validated['remove_cover_image'])) {
+                $this->invitationService->removeCoverImage($invitation);
+            } elseif ($request->hasFile('cover_image')) {
+                $this->invitationService->uploadCoverImage($invitation, $request->file('cover_image'));
+            }
 
             if (isset($validated['events'])) {
                 $this->eventService->syncEvents($invitation, $validated['events']);

@@ -56,6 +56,27 @@ class InvitationService
         return $this->invitationRepository->update($invitation, $data);
     }
 
+    public function uploadCoverImage(Invitation $invitation, $file): string
+    {
+        if ($invitation->cover_image_path && Storage::disk('public')->exists($invitation->cover_image_path)) {
+            Storage::disk('public')->delete($invitation->cover_image_path);
+        }
+
+        $path = $file->store('covers/invitation_'.$invitation->id, 'public');
+        $this->invitationRepository->update($invitation, ['cover_image_path' => $path]);
+
+        return $path;
+    }
+
+    public function removeCoverImage(Invitation $invitation): bool
+    {
+        if ($invitation->cover_image_path && Storage::disk('public')->exists($invitation->cover_image_path)) {
+            Storage::disk('public')->delete($invitation->cover_image_path);
+        }
+
+        return $this->invitationRepository->update($invitation, ['cover_image_path' => null]);
+    }
+
     public function toggleStatus(Invitation $invitation): bool
     {
         $newStatus = match ($invitation->status) {
@@ -70,6 +91,10 @@ class InvitationService
     public function deleteInvitation(Invitation $invitation): bool
     {
         return DB::transaction(function () use ($invitation) {
+            if ($invitation->cover_image_path && Storage::disk('public')->exists($invitation->cover_image_path)) {
+                Storage::disk('public')->delete($invitation->cover_image_path);
+            }
+
             foreach ($invitation->galleries as $gallery) {
                 if (Storage::disk('public')->exists($gallery->file_path)) {
                     Storage::disk('public')->delete($gallery->file_path);
@@ -83,6 +108,7 @@ class InvitationService
             }
 
             Storage::disk('public')->deleteDirectory('galleries/invitation_'.$invitation->id);
+            Storage::disk('public')->deleteDirectory('covers/invitation_'.$invitation->id);
 
             return $this->invitationRepository->delete($invitation);
         });

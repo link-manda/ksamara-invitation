@@ -258,6 +258,97 @@
 
                 <!-- Tab Pengaturan -->
                 <div x-show="tab === 'pengaturan'" x-cloak class="space-y-6">
+                    <!-- Sampul Depan / Cover Envelope Gate Section -->
+                    <flux:card class="flex flex-col gap-6" x-data="{ previewCover: null }">
+                        <div>
+                            <flux:heading size="lg">Sampul Depan (Cover Envelope Gate)</flux:heading>
+                            <flux:subheading>Atur gambar cover dan warna latar sampul depan yang tampil pertama kali saat tamu membuka link undangan Anda.</flux:subheading>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Cover Image Upload -->
+                            <div class="space-y-4">
+                                <flux:field>
+                                    <flux:label class="flex items-center gap-1.5">
+                                        <span>Gambar Cover Kustom</span>
+                                        <span class="text-xs text-zinc-400 dark:text-zinc-500 font-normal">(Opsional, Max 3MB)</span>
+                                    </flux:label>
+                                    <flux:input 
+                                        type="file" 
+                                        name="cover_image" 
+                                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                                        @change="const file = $event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => previewCover = e.target.result; reader.readAsDataURL(file); } else { previewCover = null; }"
+                                    />
+                                    <flux:error name="cover_image" />
+                                </flux:field>
+
+                                <div class="flex items-start gap-4">
+                                    @if($invitation->cover_image_path)
+                                        <div x-show="!previewCover" class="space-y-2">
+                                            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                                <flux:icon icon="check-circle" class="size-4 text-emerald-500" /> Cover Kustom Terunggah:
+                                            </span>
+                                            <div class="relative w-32 h-44 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                                                <img src="{{ Storage::url($invitation->cover_image_path) }}" class="w-full h-full object-cover">
+                                            </div>
+                                            <label class="inline-flex items-center gap-2 text-xs text-red-600 dark:text-red-400 font-medium cursor-pointer">
+                                                <input type="checkbox" name="remove_cover_image" value="1" class="rounded border-zinc-300 text-red-600">
+                                                <span>Hapus & gunakan cover default template</span>
+                                            </label>
+                                        </div>
+                                    @elseif($invitation->template && $invitation->template->default_cover_path)
+                                        <div x-show="!previewCover" class="space-y-2">
+                                            <span class="text-xs text-zinc-500 font-medium">Cover Default Template:</span>
+                                            <div class="relative w-32 h-44 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                                                <img src="{{ Storage::url($invitation->template->default_cover_path) }}" class="w-full h-full object-cover">
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div x-show="previewCover" style="display: none;" class="space-y-2">
+                                        <span class="text-xs text-amber-600 dark:text-amber-400 font-semibold">Preview Gambar Baru:</span>
+                                        <div class="relative w-32 h-44 rounded-xl overflow-hidden border border-amber-400 shadow-md">
+                                            <img :src="previewCover" class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cover Color & Recipient Defaults -->
+                            <div class="space-y-4">
+                                <flux:field>
+                                    <flux:label class="flex items-center gap-1.5">
+                                        <span>Warna Latar Cover</span>
+                                        <span class="text-xs text-zinc-400 dark:text-zinc-500 font-normal">(Opsional)</span>
+                                    </flux:label>
+                                    <div class="flex items-center gap-3">
+                                        <input 
+                                            type="color" 
+                                            name="cover_bg_color" 
+                                            value="{{ old('cover_bg_color', $invitation->cover_bg_color ?? ($invitation->template->default_cover_bg_color ?? '#FAF7F2')) }}" 
+                                            class="w-10 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-700 p-0.5 bg-white dark:bg-zinc-800"
+                                        />
+                                        <span class="text-xs font-mono text-zinc-600 dark:text-zinc-400">{{ old('cover_bg_color', $invitation->cover_bg_color ?? '#FAF7F2') }}</span>
+                                    </div>
+                                    <flux:error name="cover_bg_color" />
+                                </flux:field>
+
+                                <flux:field>
+                                    <flux:label class="flex items-center gap-1.5">
+                                        <span>Teks Default Penerima</span>
+                                        <span class="text-xs text-zinc-400 dark:text-zinc-500 font-normal">(Opsional)</span>
+                                    </flux:label>
+                                    <flux:input 
+                                        name="cover_recipient" 
+                                        placeholder="Contoh: Tamu Undangan / Bapak/Ibu/Saudara/i" 
+                                        value="{{ old('cover_recipient', $invitation->cover_recipient) }}" 
+                                    />
+                                    <flux:error name="cover_recipient" />
+                                </flux:field>
+                            </div>
+                        </div>
+                    </flux:card>
+
                     <!-- BGM Section -->
                     <flux:card class="flex flex-col gap-6">
                         <div>

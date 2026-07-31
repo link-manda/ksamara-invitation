@@ -50,6 +50,9 @@
         openInvitation() {
             this.isCoverOpen = false;
             document.body.style.overflow = '';
+            if (!this.isPlayingBgm) {
+                this.toggleBgm();
+            }
         },
 
         preloadImages() {
@@ -84,7 +87,7 @@
 
             if (frameIndex !== this.currentFrame) {
                 this.currentFrame = frameIndex;
-                this.renderCanvas(frameIndex);
+                requestAnimationFrame(() => this.renderCanvas(frameIndex));
             }
         },
 
@@ -201,9 +204,15 @@
         x-transition:leave="transition ease-in-out duration-700"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-105"
-        class="fixed inset-0 z-40 flex items-center justify-center p-6"
+        class="fixed inset-0 z-40 flex items-center justify-center p-6 overflow-hidden"
+        style="background-color: {{ $invitation->effective_cover_bg_color }}"
     >
-        <div class="w-full max-w-sm mx-auto rounded-3xl bg-[#FAF7F2]/88 border border-[#C59B27]/50 ring-1 ring-[#2C1810]/8 shadow-2xl backdrop-blur-2xl p-8 space-y-6 text-center">
+        @if($invitation->cover_image_url)
+            <img src="{{ $invitation->cover_image_url }}" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none" />
+            <div class="absolute inset-0 bg-black/35 backdrop-blur-xs z-10"></div>
+        @endif
+
+        <div class="relative z-20 w-full max-w-sm mx-auto rounded-3xl bg-[#FAF7F2]/92 border border-[#C59B27]/50 ring-1 ring-[#2C1810]/8 shadow-2xl backdrop-blur-2xl p-8 space-y-6 text-center">
 
             <div class="flex items-center justify-center gap-3">
                 <div class="h-px flex-1 bg-linear-to-r from-transparent to-[#C59B27]/40"></div>
@@ -213,10 +222,11 @@
                 <div class="h-px flex-1 bg-linear-to-l from-transparent to-[#C59B27]/40"></div>
             </div>
 
-            @if($guestName)
+            @php $recipient = $guestName ?? ($invitation->cover_recipient ?? null); @endphp
+            @if($recipient)
             <div class="space-y-0.5">
-                <p class="text-[10px] uppercase tracking-[0.25em] text-[#C59B27] font-bold">Kepada Yth</p>
-                <p class="font-serif text-lg font-bold text-[#2C1810]">{{ $guestName }}</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-[#C59B27] font-bold">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+                <p class="font-serif text-lg font-bold text-[#2C1810]">{{ $recipient }}</p>
             </div>
             @else
             <p class="text-[10px] uppercase tracking-[0.25em] text-[#C59B27] font-bold">Undangan Pernikahan</p>
@@ -799,7 +809,7 @@
         x-transition:leave-end="opacity-0"
         @click="closeLightbox()"
         @keydown.escape.window="closeLightbox()"
-        class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+        class="fixed inset-0 z-60 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
         style="display: none;"
     >
         <img

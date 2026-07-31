@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'view_path', 'thumbnail_path', 'is_active'])]
+#[Fillable(['name', 'view_path', 'thumbnail_path', 'default_cover_path', 'default_cover_bg_color', 'is_active'])]
 class Template extends Model
 {
     /** @use HasFactory<TemplateFactory> */
@@ -36,6 +36,11 @@ class Template extends Model
     public function getThumbnailUrlAttribute(): ?string
     {
         return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : null;
+    }
+
+    public function getDefaultCoverUrlAttribute(): ?string
+    {
+        return $this->default_cover_path ? Storage::url($this->default_cover_path) : null;
     }
 
     public function invitations(): HasMany
